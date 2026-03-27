@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- ANTI-CACHING META TAGS (Ensures testers always see the latest updates) -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>Road to Grove - Phuket Ale Trail</title>
+    <!-- LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* NEW FOREST GREEN & CREAM COLOR PALETTE */
+            --primary: #21432A;      
+            --primary-light: #3A6B48; 
+            --secondary: #B4C5B8;    
+            --secondary-glow: rgba(33, 67, 42, 0.2);
+            --bg-light: #F5F4EF;     
+            --card-bg: #FFFFFF;      
+            --text-main: #122617;    
+            --text-muted: #687D6D;   
+            --border: #DCD9CD;
+            --nav-bg: rgba(245, 244, 239, 0.95);
+        }
+
+        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-light); margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+        .app-container { width: 100%; max-width: 400px; height: 100vh; background-color: var(--bg-light); position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        
+        .content-area { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 90px; display: none; animation: fadeIn 0.3s ease; }
+        .content-area.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        header { padding: 40px 20px 15px; text-align: center; width: 100%; box-sizing: border-box; }
+        .logo-placeholder { width: 60px; height: 60px; margin: 0 auto 10px; background: #FFFFFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid var(--primary-light); box-shadow: 0 8px 20px rgba(33, 67, 42, 0.15); }
+        .logo-placeholder img { width: 100%; height: 100%; border-radius: 50%; object-fit: contain; }
+        h1 { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; margin: 0; color: var(--text-muted); font-weight: 700;}
+        h2 { font-size: 20px; letter-spacing: 0.5px; margin: 5px 0 0; color: var(--text-main); font-weight: 800;}
+
+        /* --- ONBOARDING SCREEN --- */
+        #onboarding-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); z-index: 200; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-sizing: border-box; text-align: center; transition: opacity 0.5s ease; }
+        #onboarding-view.hidden { opacity: 0; pointer-events: none; }
+        .ob-logo { width: 100px; height: 100px; background: var(--bg-light); border-radius: 50%; padding: 5px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .ob-title { color: white; font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: 1px;}
+        .ob-desc { color: rgba(255,255,255,0.9); font-size: 14px; line-height: 1.5; margin-bottom: 40px; }
+        .checkbox-wrapper { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; text-align: left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; width: 100%; box-sizing: border-box;}
+        .checkbox-wrapper input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--secondary); cursor: pointer; }
+        .checkbox-wrapper label { color: white; font-size: 13px; font-weight: 600; cursor: pointer;}
+        .join-btn { background: var(--secondary); color: var(--text-main); border: none; padding: 20px; border-radius: 12px; font-size: 16px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; width: 100%; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: transform 0.2s;}
+        .join-btn:active { transform: scale(0.97); }
+        .join-btn:disabled { background: #556B5B; box-shadow: none; color: #8C9E91; cursor: not-allowed; transform: none;}
+
+        /* --- EXPLORE VIEW (MAP) --- */
+        .info-card { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); margin: 0 20px 20px; padding: 20px; border-radius: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+        .info-card h3 { margin: 0 0 10px 0; font-size: 16px; font-weight: 800; color: var(--primary); }
+        .info-card p { margin: 0; font-size: 13px; line-height: 1.5; font-weight: 500; color: var(--text-muted);}
+        .trail-header { padding: 0 20px; font-size: 14px; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
+        
+        /* VISUAL MAP STYLES */
+        .island-container { position: relative; width: calc(100% - 40px); margin: 0 20px 30px; background: linear-gradient(135deg, #EBE9E0 0%, #DCD9CD 100%); border-radius: 20px; height: 450px; overflow: hidden; box-shadow: inset 0 0 20px rgba(33,67,42,0.1); border: 2px solid var(--border);}
+        .island-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .map-pin { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 10; transition: transform 0.2s;}
+        .map-pin:hover { transform: translate(-50%, -55%); z-index: 20; }
+        .pin-dot { width: 22px; height: 22px; background: var(--primary-light); border: 3px solid #FFF; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); animation: pulsePin 2s infinite; position: relative; }
+        .pin-dot::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 6px; height: 6px; background: #FFF; border-radius: 50%; }
+        .pin-label { background: rgba(255,255,255,0.95); color: var(--text-main); font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; margin-top: 5px; white-space: nowrap; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 1px solid var(--border);}
+        @keyframes pulsePin { 0% { box-shadow: 0 0 0 0 rgba(58, 107, 72, 0.6); } 70% { box-shadow: 0 0 0 10px rgba(58, 107, 72, 0); } 100% { box-shadow: 0 0 0 0 rgba(58, 107, 72, 0); } }
+
+        /* VENDOR LIST */
+        .trail-map { margin: 0 20px 20px 30px; border-left: 3px solid var(--primary-light); padding-left: 20px; position: relative;}
+        .vendor-stop { position: relative; margin-bottom: 30px; cursor: pointer; transition: transform 0.2s;}
+        .vendor-stop:active { transform: scale(0.98); }
+        .vendor-stop::before { content: ''; position: absolute; left: -29.5px; top: 0; width: 16px; height: 16px; background: white; border: 3px solid var(--primary); border-radius: 50%; box-shadow: 0 0 0 4px var(--bg-light); transition: all 0.3s; }
+        .vendor-stop:hover::before { background: var(--primary-light); border-color: var(--primary-light); }
+        .vendor-name { font-size: 16px; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0; }
+        .vendor-area { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;}
+        .vendor-chevron { position: absolute; right: 0; top: 10px; color: var(--primary-light); }
+
+        /* --- EVENTS & TRAILS VIEW --- */
+        .event-section-title { padding: 0 20px; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin: 25px 0 10px; }
+        .event-card { background: var(--card-bg); border: 1px solid var(--border); margin: 0 20px 15px; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); position: relative; cursor: pointer; transition: transform 0.2s;}
+        .event-card:active { transform: scale(0.98); }
+        .event-card h3 { margin: 0 0 6px 0; font-size: 17px; font-weight: 800; color: var(--text-main); padding-right: 70px;}
+        .event-card p { margin: 0; font-size: 12px; line-height: 1.5; font-weight: 500; color: var(--text-muted);}
+        .event-badge { position: absolute; top: 20px; right: 20px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 5px 8px; border-radius: 6px; }
+        
+        .active-event { border: 2px solid var(--primary-light); box-shadow: 0 8px 20px var(--secondary-glow); }
+        .badge-active { background: var(--primary-light); color: #FFF; }
+        
+        .upcoming-event { background: var(--bg-light); border: 1px dashed var(--text-muted); }
+        .badge-upcoming { background: var(--secondary); color: var(--text-main); }
+        
+        .locked-event { opacity: 0.65; background: #EBE9E0; cursor: not-allowed; }
+        .locked-event:active { transform: none; }
+        .locked-event h3 { color: var(--text-muted); }
+        .badge-locked { background: var(--text-muted); color: #FFF; }
+        
+        .past-event { border: 1px solid var(--border); background: #FFFFFF; }
+        .badge-past { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+        
+        .event-progress { margin-top: 15px; font-size: 12px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 5px;}
+        .event-progress.muted { color: var(--text-muted); }
+        .event-progress svg { width: 14px; height: 14px; }
+
+        /* --- BOTTOM SHEET --- */
+        .bottom-sheet { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border-radius: 24px 24px 0 0; padding: 25px 25px 90px; box-sizing: border-box; box-shadow: 0 -10px 40px rgba(0,0,0,0.15); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100; }
+        .bottom-sheet.open { transform: translateY(0); }
+        .close-btn { position: absolute; top: 20px; right: 20px; background: var(--bg-light); border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 16px; color: var(--text-muted); cursor: pointer; display: flex; justify-content: center; align-items: center;}
+        .sheet-area { display: inline-block; background: #E3EBE4; color: var(--primary); padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;}
+        .sheet-title { font-size: 22px; font-weight: 800; color: var(--text-main); margin: 0 0 10px 0;}
+        .sheet-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px;}
+        .beer-list { background: var(--bg-light); padding: 15px; border-radius: 12px; margin-bottom: 20px;}
+        .beer-list h4 { margin: 0 0 10px 0; font-size: 11px; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px;}
+        .beer-list ul { margin: 0; padding-left: 20px; font-size: 13px; color: var(--text-muted); }
+        .beer-list li { margin-bottom: 5px; }
+        .dir-btn { background: var(--primary); color: #FFFFFF; border: none; padding: 15px; border-radius: 12px; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .overlay.open { opacity: 1; pointer-events: all; }
+
+        /* --- PASSPORT VIEW --- */
+        .rank-title { display: inline-block; font-size: 12px; font-weight: 800; color: var(--text-main); margin-top: 15px; padding: 6px 15px; background: var(--secondary); border-radius: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .countdown-box { background: var(--card-bg); color: var(--text-main); padding: 15px; margin: 10px auto; width: 85%; text-align: center; border: 1px solid var(--border); border-radius: 16px; }
+        .countdown-label { font-size: 9px; letter-spacing: 2px; font-weight: 800; text-transform: uppercase; color: var(--primary); margin-bottom: 5px; display: block; }
+        .countdown-time { font-size: 20px; font-weight: 800; letter-spacing: 1px; }
+        .passport-container { width: 85%; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 25px 20px; margin: 10px auto 30px; box-sizing: border-box; }
+        .passport-header { border-bottom: 2px dashed var(--border); padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+        .count-label { color: var(--primary); font-weight: 800; font-size: 12px;}
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .slot { aspect-ratio: 1/1; border-radius: 50%; border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; position: relative; background: var(--bg-light); }
+        .slot.active { border: 2px solid var(--primary); background: #E3EBE4; }
+        .slot.active::after { content: attr(data-stamp-name); font-size: 9px; font-weight: 900; letter-spacing: 1px; color: var(--primary); border: 2px solid var(--primary); padding: 4px 5px; transform: rotate(-15deg); border-radius: 6px; background: white; text-align: center; line-height: 1.1;}
+        .scan-btn { background: var(--primary); color: #FFFFFF; border: none; padding: 18px; border-radius: 12px; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; width: 85%; margin: 0 auto; display: block; cursor: pointer; box-shadow: 0 8px 20px var(--secondary-glow); }
+
+        /* GOLDEN TICKET */
+        .golden-ticket { display: none; text-align: center; padding: 10px 0; animation: fadeIn 0.8s ease forwards; }
+        .ticket-icon { width: 70px; height: 70px; background: var(--primary-light); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px var(--secondary-glow); }
+        .golden-ticket h3 { color: var(--primary); margin: 0 0 10px; font-size: 24px; font-weight: 900;}
+        .golden-ticket p { font-size: 13px; font-weight: 500; color: var(--text-muted); line-height: 1.6; margin-bottom: 25px; }
+        .barcode { height: 45px; background: repeating-linear-gradient(90deg, var(--text-main), var(--text-main) 3px, transparent 3px, transparent 6px, var(--text-main) 6px, var(--text-main) 10px, transparent 10px, transparent 12px); margin-bottom: 12px; opacity: 0.7;}
+
+        /* --- PROFILE VIEW --- */
+        .profile-header { background: var(--primary); padding: 50px 20px 30px; text-align: center; border-radius: 0 0 30px 30px; margin-bottom: 30px;}
+        .profile-avatar { width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--secondary); margin: 0 auto 15px; background: #fff; overflow: hidden; display: flex; align-items: center; justify-content: center;}
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-name { color: white; font-size: 24px; font-weight: 800; margin: 0 0 5px; }
+        .profile-id { color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;}
+        .stats-card { background: white; border-radius: 16px; margin: -50px 20px 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); display: flex; justify-content: space-around; position: relative; z-index: 10;}
+        .stat-box { text-align: center; }
+        .stat-val { font-size: 24px; font-weight: 900; color: var(--primary); }
+        .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;}
+        .stat-divider { width: 1px; background: var(--border); }
+        .settings-list { padding: 0 20px; }
+        .settings-item { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); color: var(--text-main); font-weight: 600; font-size: 14px;}
+        .settings-item span { color: var(--text-muted); font-size: 12px;}
+        
+        .action-buttons { padding: 20px; display: flex; flex-direction: column; gap: 15px; margin-top: 10px; }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 15px; border-radius: 12px; font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; width: 100%; cursor: pointer; text-align: center; }
+        .btn-danger { background: transparent; border: 2px solid #ef4444; color: #ef4444; padding: 15px; border-radius: 12px; font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; width: 100%; cursor: pointer; text-align: center; }
+
+        /* --- BOTTOM NAV --- */
+        .bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; height: 75px; background: var(--nav-bg); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 50; padding-bottom: 15px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); text-decoration: none; cursor: pointer; transition: color 0.2s; width: 25%; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item svg { width: 22px; height: 22px; margin-bottom: 5px; stroke-width: 2.5;}
+        .nav-item span { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;}
+        
+        /* Hidden for Production */
+        #debug-log { display: none !important; }
+
+        /* Fullscreen Loading overlay */
+        #db-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(245,244,239,0.9); z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s;}
+        #db-loading.hidden { opacity: 0; pointer-events: none; }
+        .spinner { border: 4px solid var(--border); border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Dropdown Style */
+        select.lang-select { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; background: var(--bg-light); color: var(--text-main); font-family: inherit; font-size: 13px; font-weight: 700; outline: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div id="db-loading"><div class="spinner"></div><p style="color:var(--text-main); font-weight:bold; font-size: 12px;" data-i18n="syncing">Syncing VIP Data...</p></div>
+
+    <!-- ONBOARDING SCREEN -->
+    <div id="onboarding-view" class="hidden">
+        <img src="logo.png" alt="Ale Trail Logo" class="ob-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2321432A\' stroke-width=\'2\'><path d=\'M12 2C7 2 4 6 4 10c0 4 3 6 4 9h8c1-3 4-5 4-9 0-4-3-8-8-8z\'></path></svg>'">
+        <h1 class="ob-title" data-i18n="join_title">Join The Trail</h1>
+        <p class="ob-desc" data-i18n="join_desc">Become an official member of the Phuket Ale Trail. Discover local craft venues, collect digital stamps, and unlock VIP access to the Grove Craft Beer Festival.</p>
+        
+        <div class="checkbox-wrapper">
+            <input type="checkbox" id="ageCheck" onchange="window.toggleJoinButton()">
+            <label for="ageCheck" data-i18n="age_check">I confirm that I am 20 years of age or older, in compliance with Thai law.</label>
+        </div>
+
+        <button id="joinBtn" class="join-btn" disabled onclick="window.registerMember()" data-i18n="btn_join">Create Membership</button>
+        <p style="color: rgba(255,255,255,0.6); font-size: 10px; margin-top: 20px;" data-i18n="join_note">By joining, you authorize connection with your LINE profile.</p>
+    </div>
+
+    <!-- OVERLAY FOR MODAL -->
+    <div class="overlay" id="modalOverlay" onclick="window.closeVendor()"></div>
+
+    <!-- VIEW 1: EXPLORE MAP -->
+    <div id="view-explore" class="content-area active">
+        <header>
+            <div class="logo-placeholder"><img src="logo.png" alt="Logo" onerror="this.style.display='none';"></div>
+            <h1 data-i18n="app_title">Phuket Ale Trail</h1>
+            <h2 data-i18n="app_subtitle">Road to Grove</h2>
+        </header>
+        <div class="info-card">
+            <h3 data-i18n="explore_title">Your VIP Journey Starts Here</h3>
+            <p data-i18n="explore_desc">Visit all 6 participating local venues, scan their QR code to collect a digital stamp, and unlock exclusive VIP rewards at the Grove Phuket Craft Beer Festival this April!</p>
+        </div>
+        <div class="trail-header" data-i18n="map_header">Interactive Island Map</div>
+        <div class="island-container">
+            <svg class="island-svg" viewBox="0 0 100 150" preserveAspectRatio="none">
+                <defs>
+                    <filter id="drop-shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="1" dy="4" stdDeviation="4" flood-color="#21432A" flood-opacity="0.15"/></filter>
+                    <pattern id="ocean-grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="#21432A" stroke-opacity="0.05" stroke-width="0.5"/></pattern>
+                    <linearGradient id="island-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF" /><stop offset="100%" stop-color="#F5F4EF" /></linearGradient>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#ocean-grid)" />
+                <path d="M 10 20 Q 15 15 20 20 T 30 20" fill="none" stroke="#21432A" stroke-width="0.5" stroke-opacity="0.15"/>
+                <path d="M 80 120 Q 85 115 90 120 T 100 120" fill="none" stroke="#21432A" stroke-width="0.5" stroke-opacity="0.15"/>
+                <path d="M 5 90 Q 10 85 15 90 T 25 90" fill="none" stroke="#21432A" stroke-width="0.5" stroke-opacity="0.15"/>
+                <path d="M 70 40 Q 75 35 80 40 T 90 40" fill="none" stroke="#21432A" stroke-width="0.5" stroke-opacity="0.15"/>
+                <path d="M 75 125 Q 80 123, 82 128 Q 78 132, 75 125 Z" fill="url(#island-grad)" stroke="#3A6B48" stroke-width="0.5"/>
+                <path d="M 85 135 Q 88 134, 89 137 Q 86 140, 85 135 Z" fill="url(#island-grad)" stroke="#3A6B48" stroke-width="0.3"/>
+                <circle cx="85" cy="70" r="2" fill="url(#island-grad)" stroke="#3A6B48" stroke-width="0.5"/>
+                <path d="M 45 5 Q 60 10, 65 30 T 75 65 Q 95 85, 85 95 Q 65 100, 65 110 Q 70 135, 50 145 Q 40 135, 35 120 Q 20 95, 25 75 Q 15 45, 35 25 Q 40 10, 45 5 Z" fill="url(#island-grad)" stroke="#3A6B48" stroke-width="1.5" filter="url(#drop-shadow)"/>
+                <path d="M 45 15 Q 55 20, 60 35 T 65 65 Q 80 80, 75 90 Q 60 95, 60 105 Q 65 125, 50 135 Q 45 125, 40 115 Q 30 95, 32 80 Q 25 55, 40 35 Q 42 20, 45 15 Z" fill="none" stroke="#DCD9CD" stroke-width="0.5" stroke-dasharray="2,2"/>
+                <path d="M 50 25 Q 55 45, 60 60 Q 65 75, 55 85 Q 50 100, 50 120 Q 40 100, 40 80 Q 35 60, 45 40 Z" fill="none" stroke="#DCD9CD" stroke-width="0.5" stroke-dasharray="2,2"/>
+                <g transform="translate(85, 15) scale(0.3)">
+                    <circle cx="0" cy="0" r="15" fill="none" stroke="#3A6B48" stroke-width="1" stroke-opacity="0.5"/>
+                    <path d="M 0 -20 L 4 -4 L 20 0 L 4 4 L 0 20 L -4 4 L -20 0 L -4 -4 Z" fill="#21432A" opacity="0.3"/>
+                    <path d="M 0 -20 L 0 0 L 20 0 L 4 -4 Z" fill="#21432A" opacity="0.6"/>
+                    <path d="M 0 20 L 0 0 L -20 0 L -4 4 Z" fill="#21432A" opacity="0.6"/>
+                    <text x="-3" y="-23" font-family="Outfit" font-size="8" fill="#21432A" font-weight="bold">N</text>
+                </g>
+                <g transform="translate(42, 15)"><path d="M-2,0 L0,-3 L2,0 L4,0 L0,3 L-4,0 Z" fill="#EBE9E0" stroke="#687D6D" stroke-width="0.5" transform="rotate(45)"/><text x="0" y="6" font-family="Outfit" font-size="3" fill="#687D6D" font-weight="bold" text-anchor="middle" letter-spacing="0.2">AIRPORT</text></g>
+                <g transform="translate(52, 35)"><rect x="-1" y="-3" width="2" height="4" fill="#EBE9E0" stroke="#687D6D" stroke-width="0.5"/><rect x="-2" y="1" width="4" height="1" fill="#EBE9E0" stroke="#687D6D" stroke-width="0.5"/><text x="0" y="5" font-family="Outfit" font-size="3" fill="#687D6D" font-weight="bold" text-anchor="middle" letter-spacing="0.2">MONUMENT</text></g>
+                <g transform="translate(42, 100)"><path d="M0,-4 C1.5,-4 2,-2.5 2,-1 L3,1 L-3,1 L-2,-1 C-2,-2.5 -1.5,-4 0,-4 Z" fill="#EBE9E0" stroke="#687D6D" stroke-width="0.5"/><circle cx="0" cy="-5" r="1.5" fill="#EBE9E0" stroke="#687D6D" stroke-width="0.5"/><text x="0" y="4" font-family="Outfit" font-size="3" fill="#687D6D" font-weight="bold" text-anchor="middle" letter-spacing="0.2">BIG BUDDHA</text></g>
+                
+                <polyline points="32,35 56,68 68,72 55,95 60,126 52,132" fill="none" stroke="#3A6B48" stroke-width="1.5" stroke-dasharray="3,3" />
+            </svg>
+            <div id="mapPinsContainer"></div>
+        </div>
+        <div class="trail-header" data-i18n="venue_header">Venue Directory</div>
+        <div class="trail-map" id="vendorList"></div>
+    </div>
+
+    <!-- VIEW 2: PASSPORT STAMPS -->
+    <div id="view-passport" class="content-area">
+        <header style="padding-bottom: 5px;">
+            <h1 id="userNameDisplay">Welcome</h1>
+            <div id="userRank" class="rank-title">Lager Rookie</div>
+        </header>
+        <div class="countdown-box"><span class="countdown-label" data-i18n="fest_in">Festival VIP Access In</span><div id="timer" class="countdown-time">Loading...</div></div>
+        <div class="passport-container" id="passportBox">
+            <div id="standardView">
+                <div class="passport-header"><span class="label" data-i18n="vip_pass">VIP Passport</span><span class="label count-label"><span id="stamp-count">0 / 6</span> <span data-i18n="collected">Collected</span></span></div>
+                <div class="grid" id="stampGrid"></div>
+            </div>
+            <div id="ticketView" class="golden-ticket">
+                <div class="ticket-icon"><svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+                <h3 data-i18n="vip_unlocked">VIP UNLOCKED</h3><p data-i18n="vip_desc">Show this screen at the Grove Festival entrance to claim your exclusive Finisher's reward and VIP pour.</p>
+                <div class="barcode"></div><span class="label" id="vipIdCode">ID: PKT-2026-VIP</span>
+            </div>
+        </div>
+        <button class="scan-btn" id="scanBtn" onclick="window.handleScan()" data-i18n="scan_btn">Scan Venue QR</button>
+        <div id="debug-log">Loading system...</div>
+    </div>
+
+    <!-- VIEW 3: EVENTS & TRAILS HUB -->
+    <div id="view-events" class="content-area">
+        <header>
+            <h1 data-i18n="events_title">Discover</h1>
+            <h2 data-i18n="events_subtitle">Trails & Events</h2>
+        </header>
+
+        <!-- Active Trail -->
+        <div class="event-section-title" data-i18n="curr_trail">Current Trail</div>
+        <div class="event-card active-event" onclick="window.switchTab('explore')">
+            <div class="event-badge badge-active" data-i18n="active">Active</div>
+            <h3 data-i18n="rtg_title">Road to Grove</h3>
+            <p data-i18n="rtg_desc">Visit 6 local venues around Phuket to unlock VIP access to the Grove Festival.</p>
+            <div class="event-progress">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <span id="event-current-progress">0</span>/6 <span data-i18n="stamps_collected">Stamps Collected</span>
+            </div>
+        </div>
+
+        <!-- Coming Soon Event -->
+        <div class="event-section-title" data-i18n="coming_soon">Coming Soon</div>
+        <div class="event-card upcoming-event">
+            <div class="event-badge badge-upcoming">April 4, 2026</div>
+            <h3 data-i18n="rig_title">Road In Grove Festival</h3>
+            <p data-i18n="rig_desc">The main event! Collect stamps for every craft beer you try at the festival to win the ultimate finisher's prize.</p>
+        </div>
+
+        <!-- VIP Exclusive / Locked -->
+        <div class="event-section-title" data-i18n="vip_excl">VIP Exclusives</div>
+        <div class="event-card locked-event" id="vipEventCard">
+            <div class="event-badge badge-locked" id="vipEventBadge" data-i18n="locked">Locked</div>
+            <h3 data-i18n="secret_party">Secret Brewer's Afterparty</h3>
+            <p data-i18n="secret_desc">An exclusive island gathering for our top explorers.</p>
+            <div class="event-progress muted" id="vipEventReq">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span data-i18n="req_stamps">Requires 6 stamps to unlock</span>
+            </div>
+        </div>
+
+        <!-- Past Archive -->
+        <div class="event-section-title" data-i18n="past_trails">Past Trails (Archive)</div>
+        <div class="event-card past-event">
+            <div class="event-badge badge-past" data-i18n="closed">Closed</div>
+            <h3 data-i18n="island_hopper">2025 Island Hopper</h3>
+            <p data-i18n="hopper_desc">The inaugural Ale Trail across Phuket's Old Town.</p>
+            <div class="event-progress muted">4/6 <span data-i18n="stamps_collected">Stamps Collected</span></div>
+        </div>
+    </div>
+
+    <!-- VIEW 4: MEMBER PROFILE -->
+    <div id="view-profile" class="content-area">
+        <div class="profile-header">
+            <div class="profile-avatar"><img id="profImg" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23B4C5B8'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Profile"></div>
+            <h2 class="profile-name" id="profName">Explorer</h2>
+            <div class="profile-id" id="profId">MEMBER ID: PKT-XXXX</div>
+        </div>
+        <div class="stats-card">
+            <div class="stat-box"><div class="stat-val" id="statStamps">0</div><div class="stat-label" data-i18n="stamps">Stamps</div></div>
+            <div class="stat-divider"></div>
+            <div class="stat-box"><div class="stat-val" id="statRank">Rookie</div><div class="stat-label" data-i18n="rank">Rank</div></div>
+        </div>
+        <div class="settings-list">
+            <div class="settings-item"><span data-i18n="mem_status">Membership Status</span> <span style="color: #3A6B48; font-weight: 800;" data-i18n="active_status">ACTIVE</span></div>
+            <div class="settings-item"><span data-i18n="age_verified">Age Verified</span> <span data-i18n="yes">YES</span></div>
+            <div class="settings-item">
+                <span data-i18n="language">Language</span>
+                <select id="langSelect" class="lang-select" onchange="window.changeLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="th">ภาษาไทย</option>
+                    <option value="ru">Русский</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- NEW LOGOUT & DELETE BUTTONS -->
+        <div class="action-buttons">
+            <button class="btn-outline" onclick="window.handleLogout()" data-i18n="logout">Log Out</button>
+            <button class="btn-danger" onclick="window.handleDeleteAccount()" data-i18n="delete_account">Delete Account</button>
+        </div>
+    </div>
+
+    <!-- VENDOR DETAILS MODAL -->
+    <div class="bottom-sheet" id="vendorModal">
+        <button class="close-btn" onclick="window.closeVendor()">✕</button>
+        <div class="sheet-area" id="modArea">Area</div>
+        <h2 class="sheet-title" id="modTitle">Vendor Name</h2>
+        <p class="sheet-desc" id="modDesc">Description goes here.</p>
+        <div class="beer-list"><h4 data-i18n="pouring">🍻 Currently Pouring Focus</h4><ul id="modBeers"></ul></div>
+        <button class="dir-btn" onclick="window.getDirections()" data-i18n="get_dir">Get Directions</button>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" id="nav-explore" onclick="window.switchTab('explore')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg><span data-i18n="nav_map">Map</span></div>
+        <div class="nav-item" id="nav-passport" onclick="window.switchTab('passport')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg><span data-i18n="nav_pass">Passport</span></div>
+        <div class="nav-item" id="nav-events" onclick="window.switchTab('events')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><span data-i18n="nav_events">Events</span></div>
+        <div class="nav-item" id="nav-profile" onclick="window.switchTab('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span data-i18n="nav_profile">Profile</span></div>
+    </nav>
+</div>
+
+<!-- ========================================== -->
+<!-- 🔥 FIREBASE & APP LOGIC MODULE 🔥          -->
+<!-- ========================================== -->
+<script type="module">
+    // IMPORT FIREBASE SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    // ---------------------------------------------------------
+    // ⚠️ PASTE YOUR FIREBASE CONFIG HERE ⚠️
+    // ---------------------------------------------------------
+    const firebaseConfig = {
+        apiKey: "AIzaSyAJHzz7pmKuJJ3GtVXo0tvVthzZiDCuKPU",
+        authDomain: "phuket-ale-trail.firebaseapp.com",
+        projectId: "phuket-ale-trail",
+        storageBucket: "phuket-ale-trail.firebasestorage.app",
+        messagingSenderId: "911490259857",
+        appId: "1:911490259857:web:683313c0e8a3302caa5830",
+        measurementId: "G-ST8FMN6TZ8"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // --- APP STATE ---
+    const LIFF_ID = "2009417360-sriLePd1"; 
+    let userStamps = [];
+    let isRegistered = false;
+    const maxStamps = 6;
+    let userProfile = { displayName: "Explorer", userId: "U1234567890", pictureUrl: "" };
+    
+    // Default language logic
+    let currentLang = localStorage.getItem('aletrail_lang') || 'en';
+
+    // --- I18N DICTIONARY (TRANSLATIONS) ---
+    const i18n = {
+        en: {
+            syncing: "Syncing VIP Data...",
+            join_title: "Join The Trail", join_desc: "Become an official member of the Phuket Ale Trail. Discover local craft venues, collect digital stamps, and unlock VIP access to the Grove Craft Beer Festival.",
+            age_check: "I confirm that I am 20 years of age or older, in compliance with Thai law.", btn_join: "Create Membership", join_note: "By joining, you authorize connection with your LINE profile.",
+            app_title: "Phuket Ale Trail", app_subtitle: "Road to Grove", explore_title: "Your VIP Journey Starts Here", explore_desc: "Visit all 6 participating local venues, scan their QR code to collect a digital stamp, and unlock exclusive VIP rewards at the Grove Phuket Craft Beer Festival this April!",
+            map_header: "Interactive Island Map", venue_header: "Venue Directory",
+            welcome: "Cheers,", fest_in: "Festival VIP Access In", vip_pass: "VIP Passport", collected: "Collected", scan_btn: "Scan Venue QR",
+            vip_unlocked: "VIP UNLOCKED", vip_desc: "Show this screen at the Grove Festival entrance to claim your exclusive Finisher's reward and VIP pour.",
+            events_title: "Discover", events_subtitle: "Trails & Events", curr_trail: "Current Trail", active: "Active", rtg_title: "Road to Grove", rtg_desc: "Visit 6 local venues around Phuket to unlock VIP access to the Grove Festival.",
+            coming_soon: "Coming Soon", rig_title: "Road In Grove Festival", rig_desc: "The main event! Collect stamps for every craft beer you try at the festival to win the ultimate finisher's prize.",
+            vip_excl: "VIP Exclusives", locked: "Locked", unlocked: "Unlocked", secret_party: "Secret Brewer's Afterparty", secret_desc: "An exclusive island gathering for our top explorers.", req_stamps: "Requires 6 stamps to unlock", have_vip: "You have VIP Access",
+            past_trails: "Past Trails (Archive)", closed: "Closed", island_hopper: "2025 Island Hopper", hopper_desc: "The inaugural Ale Trail across Phuket's Old Town.", stamps_collected: "Stamps Collected",
+            stamps: "Stamps", rank: "Rank", mem_status: "Membership Status", active_status: "ACTIVE", age_verified: "Age Verified", yes: "YES", language: "Language / ภาษา / Язык", pouring: "🍻 Currently Pouring Focus", get_dir: "Get Directions",
+            nav_map: "Map", nav_pass: "Passport", nav_events: "Events", nav_profile: "Profile",
+            logout: "Log Out", delete_account: "Delete Account", confirm_delete: "Are you sure you want to delete your account? All your stamps will be permanently lost.",
+            scan_error: "Scanner closed or camera permission denied."
+        },
+        th: {
+            syncing: "กำลังซิงค์ข้อมูล...",
+            join_title: "เข้าร่วมเส้นทาง", join_desc: "สมัครเป็นสมาชิกอย่างเป็นทางการของ Phuket Ale Trail ค้นพบร้านคราฟต์เบียร์ท้องถิ่น สะสมแสตมป์ดิจิทัล และปลดล็อกสิทธิ์ VIP สู่เทศกาลคราฟต์เบียร์ Grove",
+            age_check: "ข้าพเจ้ายืนยันว่ามีอายุ 20 ปีบริบูรณ์ขึ้นไป ตามกฎหมายไทย", btn_join: "สมัครสมาชิก", join_note: "เมื่อเข้าร่วม คุณอนุญาตให้เข้าถึงโปรไฟล์ LINE ของคุณ",
+            app_title: "Phuket Ale Trail", app_subtitle: "Road to Grove", explore_title: "เส้นทาง VIP เริ่มที่นี่", explore_desc: "เยี่ยมชมร้านท้องถิ่นทั้ง 6 แห่ง สแกน QR Code เพื่อสะสมแสตมป์ และปลดล็อกรางวัล VIP พิเศษที่เทศกาล Grove Phuket เมษายนนี้!",
+            map_header: "แผนที่เกาะอินเทอร์แอคทีฟ", venue_header: "รายชื่อสถานที่",
+            welcome: "ชนแก้ว,", fest_in: "สิทธิ์ VIP เทศกาลในอีก", vip_pass: "พาสปอร์ต VIP", collected: "สะสมแล้ว", scan_btn: "สแกน QR ร้าน",
+            vip_unlocked: "ปลดล็อก VIP แล้ว", vip_desc: "แสดงหน้าจอนี้ที่ทางเข้างานเทศกาลเพื่อรับรางวัลผู้พิชิตและคราฟต์เบียร์ VIP ของคุณ",
+            events_title: "ค้นพบ", events_subtitle: "เส้นทางและกิจกรรม", curr_trail: "เส้นทางปัจจุบัน", active: "กำลังใช้งาน", rtg_title: "Road to Grove", rtg_desc: "เยี่ยมชม 6 ร้านรอบภูเก็ตเพื่อปลดล็อกสิทธิ์ VIP สู่เทศกาล Grove",
+            coming_soon: "เร็วๆ นี้", rig_title: "เทศกาล Road In Grove", rig_desc: "งานหลัก! สะสมแสตมป์สำหรับคราฟต์เบียร์ทุกแก้วที่คุณลองในงานเพื่อลุ้นรับรางวัลสุดยอด",
+            vip_excl: "สิทธิพิเศษ VIP", locked: "ล็อค", unlocked: "ปลดล็อคแล้ว", secret_party: "ปาร์ตี้ลับนักต้มเบียร์", secret_desc: "การรวมตัวสุดเอ็กซ์คลูซีฟบนเกาะสำหรับนักสำรวจชั้นนำของเรา", req_stamps: "ต้องใช้ 6 แสตมป์เพื่อปลดล็อก", have_vip: "คุณมีสิทธิ์ VIP Access",
+            past_trails: "เส้นทางที่ผ่านมา", closed: "ปิดแล้ว", island_hopper: "2025 Island Hopper", hopper_desc: "เส้นทาง Ale Trail ครั้งแรกในย่านเมืองเก่าภูเก็ต", stamps_collected: "แสตมป์ที่สะสม",
+            stamps: "แสตมป์", rank: "ระดับ", mem_status: "สถานะสมาชิก", active_status: "ใช้งานอยู่", age_verified: "ยืนยันอายุ", yes: "ใช่", language: "Language / ภาษา / Язык", pouring: "🍻 เบียร์แนะนำตอนนี้", get_dir: "ดูเส้นทาง",
+            nav_map: "แผนที่", nav_pass: "พาสปอร์ต", nav_events: "กิจกรรม", nav_profile: "โปรไฟล์",
+            logout: "ออกจากระบบ", delete_account: "ลบบัญชี", confirm_delete: "คุณแน่ใจหรือไม่ว่าต้องการลบบัญชีของคุณ? แสตมป์ทั้งหมดของคุณจะสูญหายอย่างถาวร",
+            scan_error: "สแกนเนอร์ถูกปิด หรือไม่ได้รับอนุญาตให้ใช้กล้อง"
+        },
+        ru: {
+            syncing: "Синхронизация данных...",
+            join_title: "Присоединяйтесь", join_desc: "Станьте участником Phuket Ale Trail. Открывайте местные крафтовые бары, собирайте печати и получите VIP-доступ на фестиваль Grove.",
+            age_check: "Я подтверждаю, что мне исполнилось 20 лет (по закону Таиланда).", btn_join: "Стать участником", join_note: "Присоединяясь, вы разрешаете подключение к профилю LINE.",
+            app_title: "Phuket Ale Trail", app_subtitle: "Road to Grove", explore_title: "Ваш VIP-маршрут начался", explore_desc: "Посетите все 6 заведений, отсканируйте их QR-код для получения печати и разблокируйте эксклюзивные VIP-награды на фестивале в апреле!",
+            map_header: "Карта острова", venue_header: "Список заведений",
+            welcome: "Ваше здоровье,", fest_in: "VIP-доступ к фестивалю через", vip_pass: "VIP Паспорт", collected: "Собрано", scan_btn: "Сканировать QR-код",
+            vip_unlocked: "VIP РАЗБЛОКИРОВАН", vip_desc: "Покажите этот экран на входе на фестиваль Grove, чтобы получить награду финалиста и VIP-напиток.",
+            events_title: "Открытия", events_subtitle: "События и Маршруты", curr_trail: "Текущий маршрут", active: "Активен", rtg_title: "Road to Grove", rtg_desc: "Посетите 6 местных баров на Пхукете, чтобы получить VIP-доступ.",
+            coming_soon: "Скоро", rig_title: "Фестиваль Road In Grove", rig_desc: "Главное событие! Собирайте печати за каждое крафтовое пиво на фестивале, чтобы выиграть приз.",
+            vip_excl: "VIP Эксклюзивы", locked: "Закрыто", unlocked: "Разблокировано", secret_party: "Секретная вечеринка", secret_desc: "Эксклюзивная вечеринка для наших лучших исследователей.", req_stamps: "Соберите 6 печатей для доступа", have_vip: "У вас есть VIP-доступ",
+            past_trails: "Прошлые маршруты", closed: "Закрыто", island_hopper: "2025 Island Hopper", hopper_desc: "Первый крафтовый маршрут по Старому городу.", stamps_collected: "Печатей собрано",
+            stamps: "Печати", rank: "Ранг", mem_status: "Статус участника", active_status: "АКТИВЕН", age_verified: "Возраст", yes: "ПОДТВЕРЖДЕН", language: "Language / ภาษา / Язык", pouring: "🍻 На кранах сейчас", get_dir: "Маршрут",
+            nav_map: "Карта", nav_pass: "Паспорт", nav_events: "События", nav_profile: "Профиль",
+            logout: "Выйти", delete_account: "Удалить аккаунт", confirm_delete: "Вы уверены, что хотите удалить свой аккаунт? Все ваши печати будут безвозвратно утеряны.",
+            scan_error: "Сканер закрыт или нет доступа к камере."
+        }
+    };
+
+    const dynamicRanks = { 
+        en: { 0: "Lager Rookie", 1: "Lager Rookie", 2: "Chalong Cruiser", 3: "Chalong Cruiser", 4: "Old Town Hopper", 5: "Old Town Hopper", 6: "Andaman Brew Legend" },
+        th: { 0: "มือใหม่ลาเกอร์", 1: "มือใหม่ลาเกอร์", 2: "นักสำรวจฉลอง", 3: "นักสำรวจฉลอง", 4: "นักท่องเมืองเก่า", 5: "นักท่องเมืองเก่า", 6: "ตำนานเบียร์อันดามัน" },
+        ru: { 0: "Новичок лагера", 1: "Новичок лагера", 2: "Исследователь Чалонга", 3: "Исследователь Чалонга", 4: "Прыгун по Старому городу", 5: "Прыгун по Старому городу", 6: "Легенда Андаманского пива" }
+    };
+
+    // --- ANTI-CHEAT QR CODE SYSTEM ---
+    const secureQRCodes = {
+        "ALE-TRAIL-CHIT-X7B9": 1, "ALE-TRAIL-BRB-M2Q4": 2, "ALE-TRAIL-FEST-K9P1": 3,
+        "ALE-TRAIL-BREW-V5N8": 4, "ALE-TRAIL-POLL-W3C2": 5, "ALE-TRAIL-COYO-T8R6": 6 
+    };
+
+    // --- VENDOR DATA (Multilingual Descriptions) ---
+    const vendors = [
+        { id: 4, name: "BrewBridge", area: "Cherngtalay", desc: { en: "The northern hub for craft lovers. BrewBridge offers a curated selection of Thai and international craft beers in a relaxed setting.", th: "ศูนย์รวมคราฟต์เบียร์แดนเหนือ มีเบียร์คราฟต์ไทยและนานาชาติให้เลือกในบรรยากาศสบายๆ", ru: "Северный центр любителей крафта. Отличный выбор местного и импортного крафтового пива." }, beers: ["Outlaw Showdown IPA", "Heart of Darkness Stout", "Rotating Guest Taps"], maps: "https://maps.app.goo.gl/8UcZUrwgGiZvUkMTA", x: 32, y: 35 },
+        { id: 3, name: "Beerfest", area: "Kathu / Town Area", desc: { en: "Famous for their own freshly brewed beers on site and hearty food. A classic stop for any true beer adventurer.", th: "ขึ้นชื่อเรื่องเบียร์สดที่ต้มเองในร้านและอาหารมื้ออร่อย จุดแวะพักที่ขาดไม่ได้", ru: "Известен собственным свежесваренным пивом и сытной едой. Классическая остановка." }, beers: ["Beerfest Wheat Beer", "Beerfest Dark Lager", "Seasonal Brews"], maps: "https://maps.app.goo.gl/8a65Jaone6uJkY8P8", x: 56, y: 68 },
+        { id: 1, name: "Chit Hole Phuket", area: "Phuket Old Town", desc: { en: "A legendary name in Thai craft beer. Situated in historic Old Town, bringing islanders the freshest pours.", th: "ตำนานคราฟต์เบียร์ไทยในย่านเมืองเก่า เสิร์ฟเบียร์สดคุณภาพเยี่ยมสู่ชาวเกาะ", ru: "Легендарное имя в тайском крафтовом пиве. Расположен в историческом Старом городе." }, beers: ["Chitbeer Pale Ale", "Summer Lay", "Old Town Special Draft"], maps: "https://maps.app.goo.gl/pm3rP9S2FCEfPFbs5", x: 68, y: 72 },
+        { id: 2, name: "BRB (Beer Right Back)", area: "Chalong", desc: { en: "The local favorite in Chalong. Friendly vibes, great music, and a fridge/tap list that never disappoints.", th: "ร้านโปรดของคนฉลอง บรรยากาศเป็นกันเอง เพลงเพราะ และเบียร์ที่ไม่เคยทำให้ผิดหวัง", ru: "Любимое место на Чалонге. Дружеская атмосфера, отличная музыка и лучший выбор." }, beers: ["Chalawan Pale Ale", "Wizard IPA", "Local Fruit Ciders"], maps: "https://maps.app.goo.gl/Lj8DgkXcjE6oZ4A7A", x: 55, y: 95 },
+        { id: 6, name: "Crafty Coyote", area: "Rawai", desc: { en: "Rawai's wildest craft beer bar. Escape the mainstream and dive into edgy vibes with an excellent rotating selection.", th: "บาร์คราฟต์เบียร์สุดมันส์ในราไวย์ หลีกหนีความจำเจมาสนุกกับเบียร์หมุนเวียนที่ยอดเยี่ยม", ru: "Самый дикий крафтовый бар на Раваи. Отличная постоянно меняющаяся подборка." }, beers: ["Coyote House Amber", "Mahanakhon Pale Ale", "Sandport Wheat"], maps: "https://maps.app.goo.gl/h9hE577pLVfhqoTM6", x: 60, y: 126 },
+        { id: 5, name: "Polly Jen Rawai Brewing", area: "Rawai", desc: { en: "The deep south's hidden gem. Brewed with local passion right in Rawai, offering unique flavors.", th: "อัญมณีที่ซ่อนอยู่ทางตอนใต้ ต้มด้วยแพสชั่นในราไวย์ พร้อมรสชาติที่ไม่เหมือนใคร", ru: "Скрытая жемчужина юга. Сварено с местной страстью прямо на Раваи, уникальные вкусы." }, beers: ["Rawai Golden Ale", "Promthep Sunset IPA", "Signature Stout"], maps: "https://maps.app.goo.gl/auDvSH1kKXnnCcT47", x: 52, y: 132 }
+    ];
+    let currentMapUrl = "";
+    
+    // --- LANGUAGE LOGIC ---
+    window.changeLanguage = function(lang) {
+        currentLang = lang;
+        localStorage.setItem('aletrail_lang', lang);
+        
+        // Update all translated text nodes
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (i18n[lang] && i18n[lang][key]) {
+                el.innerText = i18n[lang][key];
+            }
+        });
+        
+        // Update Dropdown selector to match
+        const select = document.getElementById('langSelect');
+        if(select) select.value = lang;
+        
+        // Re-render components with dynamic text
+        renderPassport();
+        if (document.getElementById('vendorModal').classList.contains('open')) {
+            const currentTitle = document.getElementById('modTitle').innerText;
+            const vendor = vendors.find(v => v.name === currentTitle);
+            if(vendor) document.getElementById('modDesc').innerText = vendor.desc[currentLang] || vendor.desc.en;
+        }
+    };
+
+    // --- FIREBASE SYNC FUNCTIONS ---
+    async function fetchUserDataFromFirebase(userId) {
+        try {
+            const docRef = doc(db, "aletrail_users", userId);
+            const docSnap = await getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                userStamps = data.stamps || [];
+                isRegistered = data.registered || false;
+            } else {
+                userStamps = [];
+                isRegistered = false;
+            }
+            
+            if (!isRegistered) document.getElementById('onboarding-view').classList.remove('hidden');
+            else document.getElementById('onboarding-view').classList.add('hidden');
+            
+            document.getElementById('db-loading').classList.add('hidden');
+            updateUIWithProfile();
+            
+        } catch (error) {
+            console.error("Firebase Read Error:", error);
+            setLog("DB Connection Error.");
+            document.getElementById('db-loading').classList.add('hidden');
+            updateUIWithProfile();
+        }
+    }
+
+    window.toggleJoinButton = function() { document.getElementById('joinBtn').disabled = !document.getElementById('ageCheck').checked; };
+    
+    window.registerMember = async function() {
+        document.getElementById('onboarding-view').style.opacity = '0';
+        setTimeout(() => { document.getElementById('onboarding-view').classList.add('hidden'); }, 500);
+        
+        isRegistered = true;
+        try {
+            await setDoc(doc(db, "aletrail_users", userProfile.userId), {
+                registered: true, displayName: userProfile.displayName, pictureUrl: userProfile.pictureUrl, stamps: [], joinedAt: new Date()
+            });
+        } catch (e) { console.error("Error saving member: ", e); }
+    };
+
+    // --- UTILS & INIT ---
+    function setLog(msg) { document.getElementById('debug-log').innerText = msg; }
+
+    async function initLIFF(retries = 3) {
+        // Initialize Language First
+        window.changeLanguage(currentLang);
+        
+        try {
+            await liff.init({ liffId: LIFF_ID });
+            if (!liff.isLoggedIn()) {
+                if (window.self !== window.top) {
+                    setLog("Canvas Preview: Mocking Login");
+                    fetchUserDataFromFirebase(userProfile.userId);
+                } else {
+                    liff.login();
+                }
+            } else {
+                userProfile = await liff.getProfile();
+                fetchUserDataFromFirebase(userProfile.userId);
+                setLog("System Ready");
+            }
+        } catch (err) {
+            // RETRY LOGIC for "Failed to fetch" (handles flaky mobile networks)
+            if (err.message && err.message.includes("Failed to fetch") && retries > 0) {
+                console.warn("Network blip detected. Retrying connection...");
+                setTimeout(() => initLIFF(retries - 1), 1000);
+                return;
+            }
+            
+            // Friendly error instead of scary debug text
+            if (window.self === window.top) {
+                alert("Network Warning: We had trouble securely connecting to LINE. If you are stuck, please close this page and reopen it from the chat menu.");
+            }
+            setLog("Init Error: " + err.message);
+            // Graceful fallback to offline mode so the app doesn't totally freeze
+            fetchUserDataFromFirebase(userProfile.userId); 
+        }
+    }
+
+    function updateUIWithProfile() {
+        document.getElementById('userNameDisplay').innerText = i18n[currentLang].welcome + " " + userProfile.displayName.split(' ')[0];
+        document.getElementById('profName').innerText = userProfile.displayName;
+        const shortId = userProfile.userId.substring(0, 8).toUpperCase();
+        document.getElementById('profId').innerText = "MEMBER ID: PKT-" + shortId;
+        document.getElementById('vipIdCode').innerText = "ID: PKT-" + shortId;
+        if(userProfile.pictureUrl) { document.getElementById('profImg').src = userProfile.pictureUrl; }
+        renderPassport();
+    }
+
+    // --- TIMERS & RENDERING ---
+    const festivalDate = new Date("April 4, 2026 12:00:00").getTime();
+    setInterval(function() {
+        const distance = festivalDate - new Date().getTime();
+        if (distance < 0) { document.getElementById("timer").innerHTML = "FESTIVAL STARTED!"; return; }
+        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        document.getElementById("timer").innerHTML = (d<10?"0"+d:d) + "D : " + (h<10?"0"+h:h) + "H : " + (m<10?"0"+m:m) + "M";
+    }, 1000);
+
+    function renderMap() {
+        const mapContainer = document.getElementById('mapPinsContainer');
+        let pinsHtml = '';
+        vendors.forEach(v => {
+            const shortName = v.name.split(' ')[0];
+            const yPercent = (v.y / 150) * 100;
+            pinsHtml += `<div class="map-pin" style="left: ${v.x}%; top: ${yPercent}%;" onclick="window.openVendor(${v.id})"><div class="pin-dot"></div><div class="pin-label">${shortName}</div></div>`;
+        });
+        mapContainer.innerHTML = pinsHtml;
+
+        const list = document.getElementById('vendorList');
+        let listHtml = '';
+        vendors.forEach(v => {
+            listHtml += `<div class="vendor-stop" onclick="window.openVendor(${v.id})"><h4 class="vendor-name">${v.name}</h4><span class="vendor-area">${v.area}</span><svg class="vendor-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></div>`;
+        });
+        list.innerHTML = listHtml;
+    }
+
+    function renderPassport() {
+        const count = userStamps.length;
+        const grid = document.getElementById("stampGrid");
+        grid.innerHTML = "";
+        
+        for (let i = 1; i <= maxStamps; i++) {
+            const slot = document.createElement("div");
+            if (userStamps.includes(i)) {
+                slot.className = "slot active";
+                const vendor = vendors.find(v => v.id === i);
+                const shortName = vendor ? vendor.name.split(' ')[0].toUpperCase() : 'STAMP';
+                slot.setAttribute('data-stamp-name', shortName);
+            } else {
+                slot.className = "slot";
+            }
+            grid.appendChild(slot);
+        }
+        
+        const currentRankName = dynamicRanks[currentLang][count] || dynamicRanks[currentLang][maxStamps];
+        document.getElementById("stamp-count").innerText = count + " / " + maxStamps;
+        document.getElementById("userRank").innerText = currentRankName;
+        
+        // Update stats on profile
+        document.getElementById("statStamps").innerText = count;
+        // Grab the last word of the rank for the small box
+        const rankWords = currentRankName.split(' ');
+        document.getElementById("statRank").innerText = rankWords[rankWords.length - 1]; 
+
+        // Update the new Events tab dynamic data
+        document.getElementById("event-current-progress").innerText = count;
+        
+        // Unlock logic for VIP Event in the Events tab
+        const vipCard = document.getElementById("vipEventCard");
+        const vipBadge = document.getElementById("vipEventBadge");
+        const vipReq = document.getElementById("vipEventReq");
+        if (count >= maxStamps) {
+            // Unlock Passport Golden Ticket
+            document.getElementById("standardView").style.display = "none";
+            document.getElementById("ticketView").style.display = "block";
+            document.getElementById("scanBtn").style.display = "none"; 
+            
+            // Unlock Event in Hub
+            vipCard.classList.remove("locked-event");
+            vipCard.classList.add("active-event");
+            vipBadge.innerText = i18n[currentLang].unlocked;
+            vipBadge.classList.replace("badge-locked", "badge-active");
+            vipReq.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span data-i18n="have_vip">${i18n[currentLang].have_vip}</span>`;
+            vipReq.classList.remove("muted");
+        }
+    }
+
+    // --- SCANNER LOGIC ---
+    window.handleScan = async function() {
+        setLog("Opening Camera...");
+        try {
+            const result = await liff.scanCodeV2();
+            const raw = result.value ? result.value.trim() : "";
+            if (!raw) { setLog("No data found in QR"); return; }
+            
+            const scannedId = secureQRCodes[raw];
+            
+            if (scannedId) {
+                if (!userStamps.includes(scannedId)) {
+                    document.getElementById('db-loading').classList.remove('hidden');
+                    
+                    try {
+                        const userRef = doc(db, "aletrail_users", userProfile.userId);
+                        await updateDoc(userRef, { stamps: arrayUnion(scannedId) });
+                        
+                        userStamps.push(scannedId);
+                        renderPassport();
+                        setLog("Stamp Secured!");
+                    } catch (e) {
+                        alert("Network error: Could not save stamp to the cloud.");
+                    } finally {
+                        document.getElementById('db-loading').classList.add('hidden');
+                    }
+                    
+                } else {
+                    alert("You already have a stamp from this venue!");
+                }
+            } else {
+                alert("Invalid Venue Code. Make sure you are scanning the official Ale Trail QR code at the bar.");
+            }
+        } catch (err) {
+            setLog("Scan Interrupted/Cancelled");
+            
+            // Production Error Handling (Removed Demo Cheat Mode)
+            if (err.code !== "USER_CANCEL") {
+                alert(i18n[currentLang].scan_error);
+            }
+        }
+    };
+
+    // --- NAVIGATION & MODALS ---
+    window.openVendor = function(id) {
+        const v = vendors.find(x => x.id === id);
+        if(!v) return;
+        document.getElementById('modTitle').innerText = v.name;
+        document.getElementById('modArea').innerText = v.area;
+        document.getElementById('modDesc').innerText = v.desc[currentLang] || v.desc.en;
+        document.getElementById('modBeers').innerHTML = v.beers.map(b => `<li>${b}</li>`).join('');
+        currentMapUrl = v.maps;
+        document.getElementById('vendorModal').classList.add('open');
+        document.getElementById('modalOverlay').classList.add('open');
+    };
+    window.closeVendor = function() { document.getElementById('vendorModal').classList.remove('open'); document.getElementById('modalOverlay').classList.remove('open'); };
+    window.getDirections = function() { if(currentMapUrl) window.open(currentMapUrl, '_blank'); };
+    
+    window.switchTab = function(tabId) {
+        const tabs = ['explore', 'passport', 'events', 'profile'];
+        tabs.forEach(id => {
+            document.getElementById('nav-' + id).classList.remove('active');
+            document.getElementById('view-' + id).classList.remove('active');
+        });
+        document.getElementById('nav-' + tabId).classList.add('active');
+        document.getElementById('view-' + tabId).classList.add('active');
+    };
+
+    // --- LOGOUT & DELETE LOGIC ---
+    window.handleLogout = function() {
+        if (liff.isLoggedIn()) {
+            liff.logout();
+        }
+        // BUG FIX: Strip old tokens out of the URL to prevent "Failed to fetch" on reload
+        window.location.href = window.location.origin + window.location.pathname;
+    };
+
+    window.handleDeleteAccount = async function() {
+        const confirmed = confirm(i18n[currentLang].confirm_delete);
+        if (confirmed) {
+            document.getElementById('db-loading').classList.remove('hidden');
+            try {
+                // Remove document from Firebase
+                if(firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                    await deleteDoc(doc(db, "aletrail_users", userProfile.userId));
+                }
+                
+                // Clear session
+                if (liff.isLoggedIn()) liff.logout();
+                
+                // BUG FIX: Strip old tokens out of the URL to prevent "Failed to fetch" on reload
+                window.location.href = window.location.origin + window.location.pathname;
+            } catch (e) {
+                console.error("Error deleting account: ", e);
+                alert("Network error: Could not delete account. Please try again.");
+                document.getElementById('db-loading').classList.add('hidden');
+            }
+        }
+    };
+
+    // RUN 
+    document.addEventListener("DOMContentLoaded", () => {
+        renderMap();
+        // BUG FIX: Small delay ensures Android WebViews are fully awake before calling LINE API
+        setTimeout(() => {
+            initLIFF();
+        }, 300);
+    });
+
+</script>
+</body>
+</html>
