@@ -17,19 +17,32 @@ export default function HubView({ onSelectPassport }) {
 
       <div className="event-section-title">{t("current_passport")}</div>
       <div className="event-card active-event pressable carnival-scope" onClick={() => onSelectPassport("road_in_grove")}>
-        <div className="event-badge badge-active">{t("festival_passport")}</div>
-        <h3>{t("hub_card_festival_title")}</h3>
+        <div
+          className="event-badge badge-active"
+          style={{ position: "relative", top: 0, right: 0, display: "inline-block", marginBottom: "12px" }}
+        >
+          {t("festival_passport")}
+        </div>
+        <h3 style={{ paddingRight: 0 }}>{t("hub_card_festival_title")}</h3>
         <p>{t("hub_card_festival_desc")}</p>
       </div>
 
       <div className="event-card active-event pressable" onClick={() => onSelectPassport("ale_trail_v1")}>
         <div
           className="event-badge"
-          style={{ background: "var(--secondary)", color: "var(--text-main)" }}
+          style={{
+            position: "relative",
+            top: 0,
+            right: 0,
+            display: "inline-block",
+            marginBottom: "12px",
+            background: "var(--secondary)",
+            color: "var(--text-main)",
+          }}
         >
           {t("ale_trail_passport")}
         </div>
-        <h3>{t("hub_card_trail_title")}</h3>
+        <h3 style={{ paddingRight: 0 }}>{t("hub_card_trail_title")}</h3>
         <p>{t("hub_card_trail_desc")}</p>
       </div>
     </section>
