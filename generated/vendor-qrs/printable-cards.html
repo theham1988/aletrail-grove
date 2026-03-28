@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Road In Grove Vendor QR Cards</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 24px;
+        background: #f5f4ef;
+        color: #122617;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 24px;
+      }
+      p {
+        margin: 0 0 20px;
+        color: #4c5f51;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: white;
+        border: 2px solid #dcd9cd;
+        border-radius: 16px;
+        padding: 16px;
+        page-break-inside: avoid;
+      }
+      .topline {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .booth {
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #b91c1c;
+      }
+      .vendor {
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 12px;
+      }
+      .qr {
+        width: 100%;
+        display: block;
+        aspect-ratio: 1 / 1;
+        object-fit: contain;
+        background: white;
+        border-radius: 12px;
+      }
+      .payload {
+        margin-top: 10px;
+        font-size: 11px;
+        color: #687d6d;
+        word-break: break-all;
+      }
+      .idline {
+        margin-top: 6px;
+        font-size: 11px;
+        color: #687d6d;
+      }
+      @media print {
+        body {
+          background: white;
+          padding: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Road In Grove Vendor QR Cards</h1>
+    <p>Print one card per vendor booth. Payloads follow the app's canonical festival scan format.</p>
+    <div class="grid">
+      <article class="card">
+        <div class="topline">
+          <div class="booth">B41</div>
+          <div class="idline">Vendor ID 1</div>
+        </div>
+        <div class="vendor">Triple Pearl</div>
+        <img class="qr" src="png/B41-triple-pearl.png" alt="Triple Pearl QR code" />
+        <div class="payload">RIGFEST-VENDOR-001</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B42</div>
+          <div class="idline">Vendor ID 2</div>
+        </div>
+        <div class="vendor">Wizard</div>
+        <img class="qr" src="png/B42-wizard.png" alt="Wizard QR code" />
+        <div class="payload">RIGFEST-VENDOR-002</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B22</div>
+          <div class="idline">Vendor ID 3</div>
+        </div>
+        <div class="vendor">Chitbeer</div>
+        <img class="qr" src="png/B22-chitbeer.png" alt="Chitbeer QR code" />
+        <div class="payload">RIGFEST-VENDOR-003</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">NO-BOOTH</div>
+          <div class="idline">Vendor ID 4</div>
+        </div>
+        <div class="vendor">Chit Hole</div>
+        <img class="qr" src="png/NO-BOOTH-chit-hole.png" alt="Chit Hole QR code" />
+        <div class="payload">RIGFEST-VENDOR-004</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">NO-BOOTH</div>
+          <div class="idline">Vendor ID 5</div>
+        </div>
+        <div class="vendor">Vanorn</div>
+        <img class="qr" src="png/NO-BOOTH-vanorn.png" alt="Vanorn QR code" />
+        <div class="payload">RIGFEST-VENDOR-005</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B32</div>
+          <div class="idline">Vendor ID 6</div>
+        </div>
+        <div class="vendor">Brewbridge</div>
+        <img class="qr" src="png/B32-brewbridge.png" alt="Brewbridge QR code" />
+        <div class="payload">RIGFEST-VENDOR-006</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B12</div>
+          <div class="idline">Vendor ID 7</div>
+        </div>
+        <div class="vendor">Beerfest</div>
+        <img class="qr" src="png/B12-beerfest.png" alt="Beerfest QR code" />
+        <div class="payload">RIGFEST-VENDOR-007</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">NO-BOOTH</div>
+          <div class="idline">Vendor ID 8</div>
+        </div>
+        <div class="vendor">Cozy Wine</div>
+        <img class="qr" src="png/NO-BOOTH-cozy-wine.png" alt="Cozy Wine QR code" />
+        <div class="payload">RIGFEST-VENDOR-008</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B38</div>
+          <div class="idline">Vendor ID 9</div>
+        </div>
+        <div class="vendor">Steel &amp; Bone</div>
+        <img class="qr" src="png/B38-steel-bone.png" alt="Steel &amp; Bone QR code" />
+        <div class="payload">RIGFEST-VENDOR-009</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">NO-BOOTH</div>
+          <div class="idline">Vendor ID 10</div>
+        </div>
+        <div class="vendor">Dibuk</div>
+        <img class="qr" src="png/NO-BOOTH-dibuk.png" alt="Dibuk QR code" />
+        <div class="payload">RIGFEST-VENDOR-010</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B03</div>
+          <div class="idline">Vendor ID 11</div>
+        </div>
+        <div class="vendor">GoDrunkLab</div>
+        <img class="qr" src="png/B03-godrunklab.png" alt="GoDrunkLab QR code" />
+        <div class="payload">RIGFEST-VENDOR-011</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B03</div>
+          <div class="idline">Vendor ID 12</div>
+        </div>
+        <div class="vendor">AunderWild</div>
+        <img class="qr" src="png/B03-aunderwild.png" alt="AunderWild QR code" />
+        <div class="payload">RIGFEST-VENDOR-012</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B23</div>
+          <div class="idline">Vendor ID 13</div>
+        </div>
+        <div class="vendor">Wiset Beer</div>
+        <img class="qr" src="png/B23-wiset-beer.png" alt="Wiset Beer QR code" />
+        <div class="payload">RIGFEST-VENDOR-013</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B02</div>
+          <div class="idline">Vendor ID 14</div>
+        </div>
+        <div class="vendor">Spirit of Songkla</div>
+        <img class="qr" src="png/B02-spirit-of-songkla.png" alt="Spirit of Songkla QR code" />
+        <div class="payload">RIGFEST-VENDOR-014</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B20</div>
+          <div class="idline">Vendor ID 15</div>
+        </div>
+        <div class="vendor">Jibbeer</div>
+        <img class="qr" src="png/B20-jibbeer.png" alt="Jibbeer QR code" />
+        <div class="payload">RIGFEST-VENDOR-015</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B31</div>
+          <div class="idline">Vendor ID 16</div>
+        </div>
+        <div class="vendor">MAD Beer</div>
+        <img class="qr" src="png/B31-mad-beer.png" alt="MAD Beer QR code" />
+        <div class="payload">RIGFEST-VENDOR-016</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B37</div>
+          <div class="idline">Vendor ID 17</div>
+        </div>
+        <div class="vendor">Umbrewla group</div>
+        <img class="qr" src="png/B37-umbrewla-group.png" alt="Umbrewla group QR code" />
+        <div class="payload">RIGFEST-VENDOR-017</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B29</div>
+          <div class="idline">Vendor ID 18</div>
+        </div>
+        <div class="vendor">Rama II</div>
+        <img class="qr" src="png/B29-rama-ii.png" alt="Rama II QR code" />
+        <div class="payload">RIGFEST-VENDOR-018</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B44</div>
+          <div class="idline">Vendor ID 19</div>
+        </div>
+        <div class="vendor">Hopzone</div>
+        <img class="qr" src="png/B44-hopzone.png" alt="Hopzone QR code" />
+        <div class="payload">RIGFEST-VENDOR-019</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">NO-BOOTH</div>
+          <div class="idline">Vendor ID 20</div>
+        </div>
+        <div class="vendor">Small town</div>
+        <img class="qr" src="png/NO-BOOTH-small-town.png" alt="Small town QR code" />
+        <div class="payload">RIGFEST-VENDOR-020</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">NO-BOOTH</div>
+          <div class="idline">Vendor ID 21</div>
+        </div>
+        <div class="vendor">Kaab House</div>
+        <img class="qr" src="png/NO-BOOTH-kaab-house.png" alt="Kaab House QR code" />
+        <div class="payload">RIGFEST-VENDOR-021</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B26</div>
+          <div class="idline">Vendor ID 22</div>
+        </div>
+        <div class="vendor">Khoy Brewing</div>
+        <img class="qr" src="png/B26-khoy-brewing.png" alt="Khoy Brewing QR code" />
+        <div class="payload">RIGFEST-VENDOR-022</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B18</div>
+          <div class="idline">Vendor ID 23</div>
+        </div>
+        <div class="vendor">Haru Craft</div>
+        <img class="qr" src="png/B18-haru-craft.png" alt="Haru Craft QR code" />
+        <div class="payload">RIGFEST-VENDOR-023</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B06</div>
+          <div class="idline">Vendor ID 24</div>
+        </div>
+        <div class="vendor">Satun Bier</div>
+        <img class="qr" src="png/B06-satun-bier.png" alt="Satun Bier QR code" />
+        <div class="payload">RIGFEST-VENDOR-024</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B16</div>
+          <div class="idline">Vendor ID 25</div>
+        </div>
+        <div class="vendor">Buraza house</div>
+        <img class="qr" src="png/B16-buraza-house.png" alt="Buraza house QR code" />
+        <div class="payload">RIGFEST-VENDOR-025</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B33</div>
+          <div class="idline">Vendor ID 26</div>
+        </div>
+        <div class="vendor">Moonray</div>
+        <img class="qr" src="png/B33-moonray.png" alt="Moonray QR code" />
+        <div class="payload">RIGFEST-VENDOR-026</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B09</div>
+          <div class="idline">Vendor ID 27</div>
+        </div>
+        <div class="vendor">Alone Craft</div>
+        <img class="qr" src="png/B09-alone-craft.png" alt="Alone Craft QR code" />
+        <div class="payload">RIGFEST-VENDOR-027</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B21</div>
+          <div class="idline">Vendor ID 28</div>
+        </div>
+        <div class="vendor">Samarn Craft</div>
+        <img class="qr" src="png/B21-samarn-craft.png" alt="Samarn Craft QR code" />
+        <div class="payload">RIGFEST-VENDOR-028</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B24</div>
+          <div class="idline">Vendor ID 29</div>
+        </div>
+        <div class="vendor">บรรเจิดเบียร์</div>
+        <img class="qr" src="png/B24-vendor-29.png" alt="บรรเจิดเบียร์ QR code" />
+        <div class="payload">RIGFEST-VENDOR-029</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B07</div>
+          <div class="idline">Vendor ID 30</div>
+        </div>
+        <div class="vendor">Mongkol Brewing</div>
+        <img class="qr" src="png/B07-mongkol-brewing.png" alt="Mongkol Brewing QR code" />
+        <div class="payload">RIGFEST-VENDOR-030</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B39</div>
+          <div class="idline">Vendor ID 31</div>
+        </div>
+        <div class="vendor">MR.SATO</div>
+        <img class="qr" src="png/B39-mrsato.png" alt="MR.SATO QR code" />
+        <div class="payload">RIGFEST-VENDOR-031</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B40</div>
+          <div class="idline">Vendor ID 32</div>
+        </div>
+        <div class="vendor">SRIRACHA Brew</div>
+        <img class="qr" src="png/B40-sriracha-brew.png" alt="SRIRACHA Brew QR code" />
+        <div class="payload">RIGFEST-VENDOR-032</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B01</div>
+          <div class="idline">Vendor ID 33</div>
+        </div>
+        <div class="vendor">HAPPYBIRTHDAY BREWING</div>
+        <img class="qr" src="png/B01-happybirthday-brewing.png" alt="HAPPYBIRTHDAY BREWING QR code" />
+        <div class="payload">RIGFEST-VENDOR-033</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B15</div>
+          <div class="idline">Vendor ID 34</div>
+        </div>
+        <div class="vendor">สีสวาด</div>
+        <img class="qr" src="png/B15-vendor-34.png" alt="สีสวาด QR code" />
+        <div class="payload">RIGFEST-VENDOR-034</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B43</div>
+          <div class="idline">Vendor ID 35</div>
+        </div>
+        <div class="vendor">APIROAM</div>
+        <img class="qr" src="png/B43-apiroam.png" alt="APIROAM QR code" />
+        <div class="payload">RIGFEST-VENDOR-035</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B25</div>
+          <div class="idline">Vendor ID 36</div>
+        </div>
+        <div class="vendor">KHAO KHO CRAFT</div>
+        <img class="qr" src="png/B25-khao-kho-craft.png" alt="KHAO KHO CRAFT QR code" />
+        <div class="payload">RIGFEST-VENDOR-036</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B04</div>
+          <div class="idline">Vendor ID 37</div>
+        </div>
+        <div class="vendor">The Brewing Corner</div>
+        <img class="qr" src="png/B04-the-brewing-corner.png" alt="The Brewing Corner QR code" />
+        <div class="payload">RIGFEST-VENDOR-037</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B30</div>
+          <div class="idline">Vendor ID 38</div>
+        </div>
+        <div class="vendor">Craft on the moon</div>
+        <img class="qr" src="png/B30-craft-on-the-moon.png" alt="Craft on the moon QR code" />
+        <div class="payload">RIGFEST-VENDOR-038</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B13</div>
+          <div class="idline">Vendor ID 39</div>
+        </div>
+        <div class="vendor">Country land</div>
+        <img class="qr" src="png/B13-country-land.png" alt="Country land QR code" />
+        <div class="payload">RIGFEST-VENDOR-039</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B11</div>
+          <div class="idline">Vendor ID 40</div>
+        </div>
+        <div class="vendor">Lanta brewery</div>
+        <img class="qr" src="png/B11-lanta-brewery.png" alt="Lanta brewery QR code" />
+        <div class="payload">RIGFEST-VENDOR-040</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B08</div>
+          <div class="idline">Vendor ID 41</div>
+        </div>
+        <div class="vendor">Mighty Ale</div>
+        <img class="qr" src="png/B08-mighty-ale.png" alt="Mighty Ale QR code" />
+        <div class="payload">RIGFEST-VENDOR-041</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B05</div>
+          <div class="idline">Vendor ID 42</div>
+        </div>
+        <div class="vendor">Chiang Rai Hops Yard</div>
+        <img class="qr" src="png/B05-chiang-rai-hops-yard.png" alt="Chiang Rai Hops Yard QR code" />
+        <div class="payload">RIGFEST-VENDOR-042</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B36</div>
+          <div class="idline">Vendor ID 43</div>
+        </div>
+        <div class="vendor">underdog+ bavarian craft</div>
+        <img class="qr" src="png/B36-underdog-bavarian-craft.png" alt="underdog+ bavarian craft QR code" />
+        <div class="payload">RIGFEST-VENDOR-043</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B24</div>
+          <div class="idline">Vendor ID 44</div>
+        </div>
+        <div class="vendor">CHACHOENGSAO FARM</div>
+        <img class="qr" src="png/B24-chachoengsao-farm.png" alt="CHACHOENGSAO FARM QR code" />
+        <div class="payload">RIGFEST-VENDOR-044</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">NO-BOOTH</div>
+          <div class="idline">Vendor ID 45</div>
+        </div>
+        <div class="vendor">HJB</div>
+        <img class="qr" src="png/NO-BOOTH-hjb.png" alt="HJB QR code" />
+        <div class="payload">RIGFEST-VENDOR-045</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B27</div>
+          <div class="idline">Vendor ID 46</div>
+        </div>
+        <div class="vendor">Azytone</div>
+        <img class="qr" src="png/B27-azytone.png" alt="Azytone QR code" />
+        <div class="payload">RIGFEST-VENDOR-046</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B25</div>
+          <div class="idline">Vendor ID 47</div>
+        </div>
+        <div class="vendor">Jo+ Beer</div>
+        <img class="qr" src="png/B25-jo-beer.png" alt="Jo+ Beer QR code" />
+        <div class="payload">RIGFEST-VENDOR-047</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B14</div>
+          <div class="idline">Vendor ID 48</div>
+        </div>
+        <div class="vendor">Chalong Bay Rum</div>
+        <img class="qr" src="png/B14-chalong-bay-rum.png" alt="Chalong Bay Rum QR code" />
+        <div class="payload">RIGFEST-VENDOR-048</div>
+      </article>
+<article class="card">
+        <div class="topline">
+          <div class="booth">B33</div>
+          <div class="idline">Vendor ID 49</div>
+        </div>
+        <div class="vendor">ISLE Craft Cider</div>
+        <img class="qr" src="png/B33-isle-craft-cider.png" alt="ISLE Craft Cider QR code" />
+        <div class="payload">RIGFEST-VENDOR-049</div>
+      </article>
+    </div>
+  </body>
+</html>

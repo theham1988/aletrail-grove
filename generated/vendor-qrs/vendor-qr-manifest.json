@@ -1,0 +1,492 @@
+[
+  {
+    "vendorId": 1,
+    "vendorName": "Triple Pearl",
+    "booth": "B41",
+    "normalizedBooth": "B41",
+    "payload": "RIGFEST-VENDOR-001",
+    "stem": "B41-triple-pearl",
+    "svgFile": "svg/B41-triple-pearl.svg",
+    "pngFile": "png/B41-triple-pearl.png"
+  },
+  {
+    "vendorId": 2,
+    "vendorName": "Wizard",
+    "booth": "B42",
+    "normalizedBooth": "B42",
+    "payload": "RIGFEST-VENDOR-002",
+    "stem": "B42-wizard",
+    "svgFile": "svg/B42-wizard.svg",
+    "pngFile": "png/B42-wizard.png"
+  },
+  {
+    "vendorId": 3,
+    "vendorName": "Chitbeer",
+    "booth": "B22",
+    "normalizedBooth": "B22",
+    "payload": "RIGFEST-VENDOR-003",
+    "stem": "B22-chitbeer",
+    "svgFile": "svg/B22-chitbeer.svg",
+    "pngFile": "png/B22-chitbeer.png"
+  },
+  {
+    "vendorId": 4,
+    "vendorName": "Chit Hole",
+    "booth": "",
+    "normalizedBooth": "NO-BOOTH",
+    "payload": "RIGFEST-VENDOR-004",
+    "stem": "NO-BOOTH-chit-hole",
+    "svgFile": "svg/NO-BOOTH-chit-hole.svg",
+    "pngFile": "png/NO-BOOTH-chit-hole.png"
+  },
+  {
+    "vendorId": 5,
+    "vendorName": "Vanorn",
+    "booth": "",
+    "normalizedBooth": "NO-BOOTH",
+    "payload": "RIGFEST-VENDOR-005",
+    "stem": "NO-BOOTH-vanorn",
+    "svgFile": "svg/NO-BOOTH-vanorn.svg",
+    "pngFile": "png/NO-BOOTH-vanorn.png"
+  },
+  {
+    "vendorId": 6,
+    "vendorName": "Brewbridge",
+    "booth": "B32",
+    "normalizedBooth": "B32",
+    "payload": "RIGFEST-VENDOR-006",
+    "stem": "B32-brewbridge",
+    "svgFile": "svg/B32-brewbridge.svg",
+    "pngFile": "png/B32-brewbridge.png"
+  },
+  {
+    "vendorId": 7,
+    "vendorName": "Beerfest",
+    "booth": "B12",
+    "normalizedBooth": "B12",
+    "payload": "RIGFEST-VENDOR-007",
+    "stem": "B12-beerfest",
+    "svgFile": "svg/B12-beerfest.svg",
+    "pngFile": "png/B12-beerfest.png"
+  },
+  {
+    "vendorId": 8,
+    "vendorName": "Cozy Wine",
+    "booth": "",
+    "normalizedBooth": "NO-BOOTH",
+    "payload": "RIGFEST-VENDOR-008",
+    "stem": "NO-BOOTH-cozy-wine",
+    "svgFile": "svg/NO-BOOTH-cozy-wine.svg",
+    "pngFile": "png/NO-BOOTH-cozy-wine.png"
+  },
+  {
+    "vendorId": 9,
+    "vendorName": "Steel & Bone",
+    "booth": "B38",
+    "normalizedBooth": "B38",
+    "payload": "RIGFEST-VENDOR-009",
+    "stem": "B38-steel-bone",
+    "svgFile": "svg/B38-steel-bone.svg",
+    "pngFile": "png/B38-steel-bone.png"
+  },
+  {
+    "vendorId": 10,
+    "vendorName": "Dibuk",
+    "booth": "",
+    "normalizedBooth": "NO-BOOTH",
+    "payload": "RIGFEST-VENDOR-010",
+    "stem": "NO-BOOTH-dibuk",
+    "svgFile": "svg/NO-BOOTH-dibuk.svg",
+    "pngFile": "png/NO-BOOTH-dibuk.png"
+  },
+  {
+    "vendorId": 11,
+    "vendorName": "GoDrunkLab",
+    "booth": "B3",
+    "normalizedBooth": "B03",
+    "payload": "RIGFEST-VENDOR-011",
+    "stem": "B03-godrunklab",
+    "svgFile": "svg/B03-godrunklab.svg",
+    "pngFile": "png/B03-godrunklab.png"
+  },
+  {
+    "vendorId": 12,
+    "vendorName": "AunderWild",
+    "booth": "B3",
+    "normalizedBooth": "B03",
+    "payload": "RIGFEST-VENDOR-012",
+    "stem": "B03-aunderwild",
+    "svgFile": "svg/B03-aunderwild.svg",
+    "pngFile": "png/B03-aunderwild.png"
+  },
+  {
+    "vendorId": 13,
+    "vendorName": "Wiset Beer",
+    "booth": "B23",
+    "normalizedBooth": "B23",
+    "payload": "RIGFEST-VENDOR-013",
+    "stem": "B23-wiset-beer",
+    "svgFile": "svg/B23-wiset-beer.svg",
+    "pngFile": "png/B23-wiset-beer.png"
+  },
+  {
+    "vendorId": 14,
+    "vendorName": "Spirit of Songkla",
+    "booth": "B2",
+    "normalizedBooth": "B02",
+    "payload": "RIGFEST-VENDOR-014",
+    "stem": "B02-spirit-of-songkla",
+    "svgFile": "svg/B02-spirit-of-songkla.svg",
+    "pngFile": "png/B02-spirit-of-songkla.png"
+  },
+  {
+    "vendorId": 15,
+    "vendorName": "Jibbeer",
+    "booth": "B20",
+    "normalizedBooth": "B20",
+    "payload": "RIGFEST-VENDOR-015",
+    "stem": "B20-jibbeer",
+    "svgFile": "svg/B20-jibbeer.svg",
+    "pngFile": "png/B20-jibbeer.png"
+  },
+  {
+    "vendorId": 16,
+    "vendorName": "MAD Beer",
+    "booth": "B31",
+    "normalizedBooth": "B31",
+    "payload": "RIGFEST-VENDOR-016",
+    "stem": "B31-mad-beer",
+    "svgFile": "svg/B31-mad-beer.svg",
+    "pngFile": "png/B31-mad-beer.png"
+  },
+  {
+    "vendorId": 17,
+    "vendorName": "Umbrewla group",
+    "booth": "B37",
+    "normalizedBooth": "B37",
+    "payload": "RIGFEST-VENDOR-017",
+    "stem": "B37-umbrewla-group",
+    "svgFile": "svg/B37-umbrewla-group.svg",
+    "pngFile": "png/B37-umbrewla-group.png"
+  },
+  {
+    "vendorId": 18,
+    "vendorName": "Rama II",
+    "booth": "B29",
+    "normalizedBooth": "B29",
+    "payload": "RIGFEST-VENDOR-018",
+    "stem": "B29-rama-ii",
+    "svgFile": "svg/B29-rama-ii.svg",
+    "pngFile": "png/B29-rama-ii.png"
+  },
+  {
+    "vendorId": 19,
+    "vendorName": "Hopzone",
+    "booth": "B44",
+    "normalizedBooth": "B44",
+    "payload": "RIGFEST-VENDOR-019",
+    "stem": "B44-hopzone",
+    "svgFile": "svg/B44-hopzone.svg",
+    "pngFile": "png/B44-hopzone.png"
+  },
+  {
+    "vendorId": 20,
+    "vendorName": "Small town",
+    "booth": "",
+    "normalizedBooth": "NO-BOOTH",
+    "payload": "RIGFEST-VENDOR-020",
+    "stem": "NO-BOOTH-small-town",
+    "svgFile": "svg/NO-BOOTH-small-town.svg",
+    "pngFile": "png/NO-BOOTH-small-town.png"
+  },
+  {
+    "vendorId": 21,
+    "vendorName": "Kaab House",
+    "booth": "",
+    "normalizedBooth": "NO-BOOTH",
+    "payload": "RIGFEST-VENDOR-021",
+    "stem": "NO-BOOTH-kaab-house",
+    "svgFile": "svg/NO-BOOTH-kaab-house.svg",
+    "pngFile": "png/NO-BOOTH-kaab-house.png"
+  },
+  {
+    "vendorId": 22,
+    "vendorName": "Khoy Brewing",
+    "booth": "B26",
+    "normalizedBooth": "B26",
+    "payload": "RIGFEST-VENDOR-022",
+    "stem": "B26-khoy-brewing",
+    "svgFile": "svg/B26-khoy-brewing.svg",
+    "pngFile": "png/B26-khoy-brewing.png"
+  },
+  {
+    "vendorId": 23,
+    "vendorName": "Haru Craft",
+    "booth": "B18",
+    "normalizedBooth": "B18",
+    "payload": "RIGFEST-VENDOR-023",
+    "stem": "B18-haru-craft",
+    "svgFile": "svg/B18-haru-craft.svg",
+    "pngFile": "png/B18-haru-craft.png"
+  },
+  {
+    "vendorId": 24,
+    "vendorName": "Satun Bier",
+    "booth": "B6",
+    "normalizedBooth": "B06",
+    "payload": "RIGFEST-VENDOR-024",
+    "stem": "B06-satun-bier",
+    "svgFile": "svg/B06-satun-bier.svg",
+    "pngFile": "png/B06-satun-bier.png"
+  },
+  {
+    "vendorId": 25,
+    "vendorName": "Buraza house",
+    "booth": "B16",
+    "normalizedBooth": "B16",
+    "payload": "RIGFEST-VENDOR-025",
+    "stem": "B16-buraza-house",
+    "svgFile": "svg/B16-buraza-house.svg",
+    "pngFile": "png/B16-buraza-house.png"
+  },
+  {
+    "vendorId": 26,
+    "vendorName": "Moonray",
+    "booth": "B33",
+    "normalizedBooth": "B33",
+    "payload": "RIGFEST-VENDOR-026",
+    "stem": "B33-moonray",
+    "svgFile": "svg/B33-moonray.svg",
+    "pngFile": "png/B33-moonray.png"
+  },
+  {
+    "vendorId": 27,
+    "vendorName": "Alone Craft",
+    "booth": "B9",
+    "normalizedBooth": "B09",
+    "payload": "RIGFEST-VENDOR-027",
+    "stem": "B09-alone-craft",
+    "svgFile": "svg/B09-alone-craft.svg",
+    "pngFile": "png/B09-alone-craft.png"
+  },
+  {
+    "vendorId": 28,
+    "vendorName": "Samarn Craft",
+    "booth": "B21",
+    "normalizedBooth": "B21",
+    "payload": "RIGFEST-VENDOR-028",
+    "stem": "B21-samarn-craft",
+    "svgFile": "svg/B21-samarn-craft.svg",
+    "pngFile": "png/B21-samarn-craft.png"
+  },
+  {
+    "vendorId": 29,
+    "vendorName": "บรรเจิดเบียร์",
+    "booth": "B24",
+    "normalizedBooth": "B24",
+    "payload": "RIGFEST-VENDOR-029",
+    "stem": "B24-vendor-29",
+    "svgFile": "svg/B24-vendor-29.svg",
+    "pngFile": "png/B24-vendor-29.png"
+  },
+  {
+    "vendorId": 30,
+    "vendorName": "Mongkol Brewing",
+    "booth": "B7",
+    "normalizedBooth": "B07",
+    "payload": "RIGFEST-VENDOR-030",
+    "stem": "B07-mongkol-brewing",
+    "svgFile": "svg/B07-mongkol-brewing.svg",
+    "pngFile": "png/B07-mongkol-brewing.png"
+  },
+  {
+    "vendorId": 31,
+    "vendorName": "MR.SATO",
+    "booth": "B39",
+    "normalizedBooth": "B39",
+    "payload": "RIGFEST-VENDOR-031",
+    "stem": "B39-mrsato",
+    "svgFile": "svg/B39-mrsato.svg",
+    "pngFile": "png/B39-mrsato.png"
+  },
+  {
+    "vendorId": 32,
+    "vendorName": "SRIRACHA Brew",
+    "booth": "B40",
+    "normalizedBooth": "B40",
+    "payload": "RIGFEST-VENDOR-032",
+    "stem": "B40-sriracha-brew",
+    "svgFile": "svg/B40-sriracha-brew.svg",
+    "pngFile": "png/B40-sriracha-brew.png"
+  },
+  {
+    "vendorId": 33,
+    "vendorName": "HAPPYBIRTHDAY BREWING",
+    "booth": "B1",
+    "normalizedBooth": "B01",
+    "payload": "RIGFEST-VENDOR-033",
+    "stem": "B01-happybirthday-brewing",
+    "svgFile": "svg/B01-happybirthday-brewing.svg",
+    "pngFile": "png/B01-happybirthday-brewing.png"
+  },
+  {
+    "vendorId": 34,
+    "vendorName": "สีสวาด",
+    "booth": "B15",
+    "normalizedBooth": "B15",
+    "payload": "RIGFEST-VENDOR-034",
+    "stem": "B15-vendor-34",
+    "svgFile": "svg/B15-vendor-34.svg",
+    "pngFile": "png/B15-vendor-34.png"
+  },
+  {
+    "vendorId": 35,
+    "vendorName": "APIROAM",
+    "booth": "B43",
+    "normalizedBooth": "B43",
+    "payload": "RIGFEST-VENDOR-035",
+    "stem": "B43-apiroam",
+    "svgFile": "svg/B43-apiroam.svg",
+    "pngFile": "png/B43-apiroam.png"
+  },
+  {
+    "vendorId": 36,
+    "vendorName": "KHAO KHO CRAFT",
+    "booth": "B25",
+    "normalizedBooth": "B25",
+    "payload": "RIGFEST-VENDOR-036",
+    "stem": "B25-khao-kho-craft",
+    "svgFile": "svg/B25-khao-kho-craft.svg",
+    "pngFile": "png/B25-khao-kho-craft.png"
+  },
+  {
+    "vendorId": 37,
+    "vendorName": "The Brewing Corner",
+    "booth": "B4",
+    "normalizedBooth": "B04",
+    "payload": "RIGFEST-VENDOR-037",
+    "stem": "B04-the-brewing-corner",
+    "svgFile": "svg/B04-the-brewing-corner.svg",
+    "pngFile": "png/B04-the-brewing-corner.png"
+  },
+  {
+    "vendorId": 38,
+    "vendorName": "Craft on the moon",
+    "booth": "B30",
+    "normalizedBooth": "B30",
+    "payload": "RIGFEST-VENDOR-038",
+    "stem": "B30-craft-on-the-moon",
+    "svgFile": "svg/B30-craft-on-the-moon.svg",
+    "pngFile": "png/B30-craft-on-the-moon.png"
+  },
+  {
+    "vendorId": 39,
+    "vendorName": "Country land",
+    "booth": "B13",
+    "normalizedBooth": "B13",
+    "payload": "RIGFEST-VENDOR-039",
+    "stem": "B13-country-land",
+    "svgFile": "svg/B13-country-land.svg",
+    "pngFile": "png/B13-country-land.png"
+  },
+  {
+    "vendorId": 40,
+    "vendorName": "Lanta brewery",
+    "booth": "B11",
+    "normalizedBooth": "B11",
+    "payload": "RIGFEST-VENDOR-040",
+    "stem": "B11-lanta-brewery",
+    "svgFile": "svg/B11-lanta-brewery.svg",
+    "pngFile": "png/B11-lanta-brewery.png"
+  },
+  {
+    "vendorId": 41,
+    "vendorName": "Mighty Ale",
+    "booth": "B8",
+    "normalizedBooth": "B08",
+    "payload": "RIGFEST-VENDOR-041",
+    "stem": "B08-mighty-ale",
+    "svgFile": "svg/B08-mighty-ale.svg",
+    "pngFile": "png/B08-mighty-ale.png"
+  },
+  {
+    "vendorId": 42,
+    "vendorName": "Chiang Rai Hops Yard",
+    "booth": "B5",
+    "normalizedBooth": "B05",
+    "payload": "RIGFEST-VENDOR-042",
+    "stem": "B05-chiang-rai-hops-yard",
+    "svgFile": "svg/B05-chiang-rai-hops-yard.svg",
+    "pngFile": "png/B05-chiang-rai-hops-yard.png"
+  },
+  {
+    "vendorId": 43,
+    "vendorName": "underdog+ bavarian craft",
+    "booth": "B36",
+    "normalizedBooth": "B36",
+    "payload": "RIGFEST-VENDOR-043",
+    "stem": "B36-underdog-bavarian-craft",
+    "svgFile": "svg/B36-underdog-bavarian-craft.svg",
+    "pngFile": "png/B36-underdog-bavarian-craft.png"
+  },
+  {
+    "vendorId": 44,
+    "vendorName": "CHACHOENGSAO FARM",
+    "booth": "B24",
+    "normalizedBooth": "B24",
+    "payload": "RIGFEST-VENDOR-044",
+    "stem": "B24-chachoengsao-farm",
+    "svgFile": "svg/B24-chachoengsao-farm.svg",
+    "pngFile": "png/B24-chachoengsao-farm.png"
+  },
+  {
+    "vendorId": 45,
+    "vendorName": "HJB",
+    "booth": "",
+    "normalizedBooth": "NO-BOOTH",
+    "payload": "RIGFEST-VENDOR-045",
+    "stem": "NO-BOOTH-hjb",
+    "svgFile": "svg/NO-BOOTH-hjb.svg",
+    "pngFile": "png/NO-BOOTH-hjb.png"
+  },
+  {
+    "vendorId": 46,
+    "vendorName": "Azytone",
+    "booth": "B27",
+    "normalizedBooth": "B27",
+    "payload": "RIGFEST-VENDOR-046",
+    "stem": "B27-azytone",
+    "svgFile": "svg/B27-azytone.svg",
+    "pngFile": "png/B27-azytone.png"
+  },
+  {
+    "vendorId": 47,
+    "vendorName": "Jo+ Beer",
+    "booth": "B25",
+    "normalizedBooth": "B25",
+    "payload": "RIGFEST-VENDOR-047",
+    "stem": "B25-jo-beer",
+    "svgFile": "svg/B25-jo-beer.svg",
+    "pngFile": "png/B25-jo-beer.png"
+  },
+  {
+    "vendorId": 48,
+    "vendorName": "Chalong Bay Rum",
+    "booth": "B14",
+    "normalizedBooth": "B14",
+    "payload": "RIGFEST-VENDOR-048",
+    "stem": "B14-chalong-bay-rum",
+    "svgFile": "svg/B14-chalong-bay-rum.svg",
+    "pngFile": "png/B14-chalong-bay-rum.png"
+  },
+  {
+    "vendorId": 49,
+    "vendorName": "ISLE Craft Cider",
+    "booth": "B33",
+    "normalizedBooth": "B33",
+    "payload": "RIGFEST-VENDOR-049",
+    "stem": "B33-isle-craft-cider",
+    "svgFile": "svg/B33-isle-craft-cider.svg",
+    "pngFile": "png/B33-isle-craft-cider.png"
+  }
+]
