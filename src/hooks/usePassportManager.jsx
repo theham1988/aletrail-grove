@@ -1,12 +1,26 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc, runTransaction, serverTimestamp, setDoc } from "firebase/firestore";
 import vendors from "../data/vendors.json";
-import { secureFestivalQRCodes } from "../data/festivalConfig";
+import {
+  FESTIVAL_ELIGIBILITY_STAMPS,
+  FESTIVAL_EVENT_KEY,
+  buildDefaultGoldenBeerByDay,
+  buildGoldenBeerDayState,
+  secureFestivalQRCodes,
+  toFestivalDayKey,
+  getFestivalEventStatus,
+} from "../data/festivalConfig";
 import { db } from "../lib/firebase";
 
 const DEFAULT_PASSPORTS = {
   road_in_grove: [],
   ale_trail_v1: [],
+};
+
+const DEFAULT_FESTIVAL_META = {
+  eligibleDays: [],
+  festivalEligible: false,
+  goldenBeerWins: [],
 };
 
 function resolveVendorFromScan(rawValue) {
@@ -26,6 +40,15 @@ async function scanQRCode() {
   return window.prompt("Enter QR payload (vendor id or exact vendor name):") || "";
 }
 
+function mergeGoldenBeerByDay(partial) {
+  const defaults = buildDefaultGoldenBeerByDay();
+  const source = partial && typeof partial === "object" ? partial : {};
+
+  return Object.fromEntries(
+    Object.entries(defaults).map(([dayKey, defaultState]) => [dayKey, buildGoldenBeerDayState(dayKey, source[dayKey] || defaultState)]),
+  );
+}
+
 export function usePassportManager(userId, authProfile) {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -35,12 +58,16 @@ export function usePassportManager(userId, authProfile) {
   });
   const [passports, setPassports] = useState(DEFAULT_PASSPORTS);
   const [legacyStamps, setLegacyStamps] = useState([]);
+  const [festivalMeta, setFestivalMeta] = useState(DEFAULT_FESTIVAL_META);
+  const [scanHistory, setScanHistory] = useState([]);
+  const [goldenBeerByDay, setGoldenBeerByDay] = useState(buildDefaultGoldenBeerByDay());
   const [error, setError] = useState("");
 
   const userRef = useMemo(() => {
     if (!userId) return null;
     return doc(db, "aletrail_users", userId);
   }, [userId]);
+  const festivalRuntimeRef = useMemo(() => doc(db, "festival_events", FESTIVAL_EVENT_KEY), []);
 
   const refresh = useCallback(async () => {
     if (!userRef) {
@@ -51,10 +78,15 @@ export function usePassportManager(userId, authProfile) {
     setLoading(true);
     setError("");
     try {
-      const snapshot = await getDoc(userRef);
+      const [snapshot, runtimeSnapshot] = await Promise.all([getDoc(userRef), getDoc(festivalRuntimeRef)]);
+      const runtimeData = runtimeSnapshot.exists() ? runtimeSnapshot.data() : {};
+      setGoldenBeerByDay(mergeGoldenBeerByDay(runtimeData.goldenBeerByDay));
+
       if (!snapshot.exists()) {
         setPassports(DEFAULT_PASSPORTS);
         setLegacyStamps([]);
+        setFestivalMeta(DEFAULT_FESTIVAL_META);
+        setScanHistory([]);
         setProfile({
           displayName: authProfile?.displayName || "Festival Explorer",
           pictureUrl: authProfile?.pictureUrl || "",
@@ -74,16 +106,77 @@ export function usePassportManager(userId, authProfile) {
       });
       setPassports(nextPassports);
       setLegacyStamps(Array.isArray(data.stamps) ? data.stamps : []);
+      setFestivalMeta({
+        ...DEFAULT_FESTIVAL_META,
+        ...(typeof data.festivalMeta === "object" && data.festivalMeta ? data.festivalMeta : {}),
+      });
+      setScanHistory(Array.isArray(data.scanHistory) ? data.scanHistory : []);
     } catch (err) {
       setError(err?.message || "Failed to load passport data.");
     } finally {
       setLoading(false);
     }
-  }, [userRef, authProfile?.displayName, authProfile?.pictureUrl]);
+  }, [festivalRuntimeRef, userRef, authProfile?.displayName, authProfile?.pictureUrl]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  const claimGoldenBeerWin = useCallback(
+    async ({ dayKey, vendorId }) => {
+      if (!festivalRuntimeRef || !userId || !dayKey) {
+        return { won: false, goldenBeerByDay: goldenBeerByDay };
+      }
+
+      try {
+        return await runTransaction(db, async (transaction) => {
+          const runtimeSnapshot = await transaction.get(festivalRuntimeRef);
+          const runtimeData = runtimeSnapshot.exists() ? runtimeSnapshot.data() : {};
+          const currentGoldenBeerByDay = mergeGoldenBeerByDay(runtimeData.goldenBeerByDay);
+          const dayState = currentGoldenBeerByDay[dayKey];
+
+          if (dayState.claimedBy) {
+            return { won: false, goldenBeerByDay: currentGoldenBeerByDay };
+          }
+
+          const nextAttemptCount = (dayState.attemptCount || 0) + 1;
+          const won = nextAttemptCount === dayState.winningAttempt;
+          const nextDayState = {
+            ...dayState,
+            attemptCount: nextAttemptCount,
+            ...(won
+              ? {
+                  claimedBy: userId,
+                  claimedAt: new Date().toISOString(),
+                  vendorId,
+                  displayName: authProfile?.displayName || profile.displayName || "Festival Explorer",
+                }
+              : {}),
+          };
+
+          const nextGoldenBeerByDay = {
+            ...currentGoldenBeerByDay,
+            [dayKey]: nextDayState,
+          };
+
+          transaction.set(
+            festivalRuntimeRef,
+            {
+              goldenBeerByDay: nextGoldenBeerByDay,
+              updatedAt: serverTimestamp(),
+            },
+            { merge: true },
+          );
+
+          return { won, goldenBeerByDay: nextGoldenBeerByDay };
+        });
+      } catch (transactionError) {
+        console.warn("Golden beer claim check failed.", transactionError);
+        return { won: false, goldenBeerByDay };
+      }
+    },
+    [authProfile?.displayName, db, festivalRuntimeRef, goldenBeerByDay, profile.displayName, userId],
+  );
 
   const scanAndApplyVendor = useCallback(async () => {
     if (!userRef) return null;
@@ -98,19 +191,75 @@ export function usePassportManager(userId, authProfile) {
 
       const snapshot = await getDoc(userRef);
       const data = snapshot.exists() ? snapshot.data() : {};
+      const eventStatus = getFestivalEventStatus(new Date());
 
       const existingPassports = {
         ...DEFAULT_PASSPORTS,
         ...(typeof data.passports === "object" && data.passports ? data.passports : {}),
       };
+      const existingFestivalMeta = {
+        ...DEFAULT_FESTIVAL_META,
+        ...(typeof data.festivalMeta === "object" && data.festivalMeta ? data.festivalMeta : {}),
+      };
+      const existingScanHistory = Array.isArray(data.scanHistory) ? data.scanHistory : [];
 
       const updatedPassports = { ...existingPassports };
+      const addedPassportKeys = [];
       let addedNewStamp = false;
       for (const passportKey of vendor.activePassports) {
         const currentEntries = Array.isArray(updatedPassports[passportKey]) ? updatedPassports[passportKey] : [];
         if (!currentEntries.includes(vendor.id)) {
           updatedPassports[passportKey] = [...currentEntries, vendor.id].sort((a, b) => a - b);
           addedNewStamp = true;
+          addedPassportKeys.push(passportKey);
+        }
+      }
+
+      const updatedFestivalMeta = {
+        ...existingFestivalMeta,
+        eligibleDays: Array.isArray(existingFestivalMeta.eligibleDays) ? [...existingFestivalMeta.eligibleDays] : [],
+        goldenBeerWins: Array.isArray(existingFestivalMeta.goldenBeerWins) ? [...existingFestivalMeta.goldenBeerWins] : [],
+      };
+      let updatedScanHistory = [...existingScanHistory];
+      let eligibilityUnlocked = false;
+      let enteredDailyDraw = false;
+      let goldenBeerWon = false;
+      let nextGoldenBeerByDay = goldenBeerByDay;
+
+      const currentDayKey = eventStatus.isLive ? eventStatus.currentDayKey : null;
+      const isFestivalRoadInGroveScan = vendor.activePassports.includes("road_in_grove") && currentDayKey;
+
+      if (isFestivalRoadInGroveScan) {
+        const roadInGroveCount = (updatedPassports.road_in_grove || []).length;
+
+        updatedScanHistory = [
+          ...existingScanHistory,
+          {
+            vendorId: vendor.id,
+            passportKey: "road_in_grove",
+            scannedAt: new Date().toISOString(),
+            dayKey: currentDayKey,
+          },
+        ];
+
+        if (roadInGroveCount >= FESTIVAL_ELIGIBILITY_STAMPS) {
+          if (!updatedFestivalMeta.festivalEligible) {
+            eligibilityUnlocked = true;
+          }
+
+          updatedFestivalMeta.festivalEligible = true;
+          if (!updatedFestivalMeta.eligibleDays.includes(currentDayKey)) {
+            updatedFestivalMeta.eligibleDays = [...updatedFestivalMeta.eligibleDays, currentDayKey].sort();
+            enteredDailyDraw = true;
+          }
+        }
+
+        const goldenBeerResult = await claimGoldenBeerWin({ dayKey: currentDayKey, vendorId: vendor.id });
+        goldenBeerWon = Boolean(goldenBeerResult.won);
+        nextGoldenBeerByDay = mergeGoldenBeerByDay(goldenBeerResult.goldenBeerByDay);
+
+        if (goldenBeerWon && !updatedFestivalMeta.goldenBeerWins.includes(currentDayKey)) {
+          updatedFestivalMeta.goldenBeerWins = [...updatedFestivalMeta.goldenBeerWins, currentDayKey].sort();
         }
       }
 
@@ -118,6 +267,8 @@ export function usePassportManager(userId, authProfile) {
         userRef,
         {
           passports: updatedPassports,
+          festivalMeta: updatedFestivalMeta,
+          scanHistory: updatedScanHistory,
           displayName: authProfile?.displayName || profile.displayName || "Festival Explorer",
           pictureUrl: authProfile?.pictureUrl || profile.pictureUrl || "",
           updatedAt: serverTimestamp(),
@@ -126,17 +277,34 @@ export function usePassportManager(userId, authProfile) {
       );
 
       setPassports(updatedPassports);
+      setFestivalMeta(updatedFestivalMeta);
+      setScanHistory(updatedScanHistory);
+      setGoldenBeerByDay(nextGoldenBeerByDay);
       if (addedNewStamp && navigator.vibrate) {
         navigator.vibrate([200]);
       }
-      return vendor;
+      return {
+        vendor,
+        addedNewStamp,
+        eligibilityUnlocked,
+        enteredDailyDraw,
+        goldenBeerWon,
+      };
     } catch (err) {
       setError(err?.message || "Scan failed.");
       return null;
     } finally {
       setSyncing(false);
     }
-  }, [authProfile?.displayName, authProfile?.pictureUrl, profile.displayName, profile.pictureUrl, userRef]);
+  }, [
+    authProfile?.displayName,
+    authProfile?.pictureUrl,
+    claimGoldenBeerWin,
+    goldenBeerByDay,
+    profile.displayName,
+    profile.pictureUrl,
+    userRef,
+  ]);
 
   return {
     loading,
@@ -144,6 +312,9 @@ export function usePassportManager(userId, authProfile) {
     profile,
     passports,
     legacyStamps,
+    festivalMeta,
+    scanHistory,
+    goldenBeerByDay,
     error,
     refresh,
     scanAndApplyVendor,

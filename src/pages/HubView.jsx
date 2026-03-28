@@ -1,6 +1,7 @@
+import FestivalEventStatusCard from "../components/FestivalEventStatusCard";
 import { useLanguage } from "../contexts/LanguageContext";
 
-export default function HubView({ onSelectPassport }) {
+export default function HubView({ onSelectPassport, stampsCount, festivalMeta, goldenBeerByDay }) {
   const { t } = useLanguage();
 
   return (
@@ -14,6 +15,13 @@ export default function HubView({ onSelectPassport }) {
         <h3>{t("app_subtitle")}</h3>
         <p>{t("hub_desc")}</p>
       </div>
+
+      <FestivalEventStatusCard
+        compact
+        stampsCount={stampsCount}
+        festivalMeta={festivalMeta}
+        goldenBeerByDay={goldenBeerByDay}
+      />
 
       <div className="event-section-title">{t("current_passport")}</div>
 

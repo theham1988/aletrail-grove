@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import liff from "@line/liff";
 import confetti from "canvas-confetti";
 import { deleteDoc, doc } from "firebase/firestore";
-import { Beer, MapPinned, QrCode, House } from "lucide-react";
+import { Beer, QrCode, House } from "lucide-react";
 import BottomNav from "./components/BottomNav";
 import { useLanguage } from "./contexts/LanguageContext";
 import { usePassportManager } from "./hooks/usePassportManager";
@@ -10,12 +10,21 @@ import { db } from "./lib/firebase";
 import AleTrailExperienceView from "./pages/AleTrailExperienceView";
 import HubView from "./pages/HubView";
 import ProfileView from "./pages/ProfileView";
-import RoadInGroveMapTab from "./pages/RoadInGroveMapTab";
 import RoadInGrovePassportTab from "./pages/RoadInGrovePassportTab";
 import RoadInGrovePoursTab from "./pages/RoadInGrovePoursTab";
 
 const LOCAL_USER_KEY = "rig_demo_user_id";
+const LIFF_PROFILE_CACHE_KEY = "rig_liff_profile_cache";
 const LIFF_ID = "2009417360-sriLePd1";
+
+function readCachedLiffProfile() {
+  try {
+    const cached = localStorage.getItem(LIFF_PROFILE_CACHE_KEY);
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function App() {
   const { t } = useLanguage();
@@ -34,6 +43,8 @@ export default function App() {
     let alive = true;
 
     async function initLiffUser() {
+      const cachedProfile = readCachedLiffProfile();
+
       try {
         // Keep local fallback only for embedded browser testing environments.
         if (window.self !== window.top) {
@@ -53,22 +64,60 @@ export default function App() {
           return;
         }
 
-        await liff.init({ liffId: LIFF_ID });
+        await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
         if (liff.isLoggedIn()) {
-          const userProfile = await liff.getProfile();
+          const decodedToken = liff.getDecodedIDToken();
+          const context = liff.getContext();
+          let nextUserId = context?.userId || decodedToken?.sub || cachedProfile?.userId || "";
+          let nextProfile = {
+            displayName: decodedToken?.name || cachedProfile?.displayName || "Festival Explorer",
+            pictureUrl: decodedToken?.picture || cachedProfile?.pictureUrl || "",
+          };
+
+          try {
+            const userProfile = await liff.getProfile();
+            nextUserId = userProfile.userId || nextUserId;
+            nextProfile = {
+              displayName: userProfile.displayName || nextProfile.displayName,
+              pictureUrl: userProfile.pictureUrl || nextProfile.pictureUrl,
+            };
+          } catch (profileError) {
+            console.warn("LINE profile fetch failed, using token/context fallback.", profileError);
+          }
+
+          if (!nextUserId) {
+            throw new Error("Unable to fetch LINE account details.");
+          }
+
+          localStorage.setItem(
+            LIFF_PROFILE_CACHE_KEY,
+            JSON.stringify({
+              userId: nextUserId,
+              displayName: nextProfile.displayName,
+              pictureUrl: nextProfile.pictureUrl,
+            }),
+          );
+
           if (alive) {
-            setInitialUserId(userProfile.userId);
-            setAuthProfile({
-              displayName: userProfile.displayName,
-              pictureUrl: userProfile.pictureUrl || "",
-            });
+            setInitialUserId(nextUserId);
+            setAuthProfile(nextProfile);
+            setAuthError("");
           }
         } else {
           liff.login();
           return;
         }
       } catch (error) {
-        if (alive) setAuthError(error?.message || "Failed to initialize LINE login.");
+        if (cachedProfile?.userId && alive) {
+          setInitialUserId(cachedProfile.userId);
+          setAuthProfile({
+            displayName: cachedProfile.displayName || "Festival Explorer",
+            pictureUrl: cachedProfile.pictureUrl || "",
+          });
+          setAuthError("LINE fetch failed. Using cached profile.");
+        } else if (alive) {
+          setAuthError(error?.message || "Failed to initialize LINE login.");
+        }
       } finally {
         if (alive) setAuthReady(true);
       }
@@ -80,7 +129,7 @@ export default function App() {
     };
   }, []);
 
-  const { loading, syncing, profile, passports, legacyStamps, error, scanAndApplyVendor } =
+  const { loading, syncing, profile, passports, legacyStamps, festivalMeta, goldenBeerByDay, error, scanAndApplyVendor } =
     usePassportManager(initialUserId, authProfile);
 
   const roadInGroveStamps = passports.road_in_grove || [];
@@ -119,7 +168,7 @@ export default function App() {
   const openPassport = (passportId) => {
     setSelectedPassport(passportId);
     if (passportId === "road_in_grove") {
-      setActiveTab("festival_map");
+      setActiveTab("festival_pours");
       return;
     }
     setActiveTab("passport");
@@ -141,9 +190,19 @@ export default function App() {
   };
 
   const handleScan = async () => {
-    const vendor = await scanAndApplyVendor();
-    if (vendor) {
-      window.alert(`Stamped ${vendor.name} in ${vendor.activePassports.join(", ")}`);
+    const result = await scanAndApplyVendor();
+    if (result?.vendor) {
+      if (result.goldenBeerWon) {
+        window.alert(`${t("golden_beer_found_title")}\n\n${t("golden_beer_found_desc")}`);
+        return;
+      }
+
+      if (result.eligibilityUnlocked) {
+        window.alert(`${t("festival_entry_unlocked")}\n\n${t("festival_entry_unlocked_desc")}`);
+        return;
+      }
+
+      window.alert(`Stamped ${result.vendor.name} in ${result.vendor.activePassports.join(", ")}`);
     }
   };
 
@@ -161,16 +220,21 @@ export default function App() {
 
   const activeView = useMemo(() => {
     if (activeTab === "hub") {
-      return <HubView onSelectPassport={openPassport} />;
-    }
-    if (selectedPassport === "road_in_grove" && activeTab === "festival_map") {
-      return <RoadInGroveMapTab syncing={syncing} onScan={handleScan} />;
+      return <HubView onSelectPassport={openPassport} stampsCount={roadInGroveStamps.length} festivalMeta={festivalMeta} goldenBeerByDay={goldenBeerByDay} />;
     }
     if (selectedPassport === "road_in_grove" && activeTab === "festival_pours") {
       return <RoadInGrovePoursTab syncing={syncing} onScan={handleScan} />;
     }
     if (selectedPassport === "road_in_grove" && activeTab === "festival_passport") {
-      return <RoadInGrovePassportTab stamps={roadInGroveStamps} syncing={syncing} onScan={handleScan} />;
+      return (
+        <RoadInGrovePassportTab
+          stamps={roadInGroveStamps}
+          syncing={syncing}
+          onScan={handleScan}
+          festivalMeta={festivalMeta}
+          goldenBeerByDay={goldenBeerByDay}
+        />
+      );
     }
     if (activeTab === "passport" && selectedPassport === "ale_trail_v1") {
       return (
@@ -209,6 +273,8 @@ export default function App() {
     authProfile.pictureUrl,
     initialUserId,
     legacyStamps,
+    festivalMeta,
+    goldenBeerByDay,
     passports,
     profile.displayName,
     profile.pictureUrl,
@@ -222,7 +288,6 @@ export default function App() {
   const bottomNavItems = useMemo(() => {
     if (selectedPassport === "road_in_grove" && activeTab.startsWith("festival_")) {
       return [
-        { key: "festival_map", label: t("nav_map"), icon: MapPinned },
         { key: "festival_pours", label: t("nav_pours"), icon: Beer },
         { key: "festival_passport", label: t("nav_pass"), icon: QrCode },
         { key: "hub", label: t("nav_hub"), icon: House },

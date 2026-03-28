@@ -1,3 +1,4 @@
+import FestivalEventStatusCard from "../components/FestivalEventStatusCard";
 import { QrCode } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 
@@ -12,7 +13,7 @@ function getCurrentTier(totalStamps) {
   return tiers.find((tier) => totalStamps < tier.target) || tiers[tiers.length - 1];
 }
 
-export default function RoadInGrovePassportTab({ stamps, syncing, onScan }) {
+export default function RoadInGrovePassportTab({ stamps, syncing, onScan, festivalMeta, goldenBeerByDay }) {
   const { t } = useLanguage();
   const currentTier = getCurrentTier(stamps.length);
   const previousTierTarget = tiers[tiers.findIndex((tier) => tier.id === currentTier.id) - 1]?.target || 0;
@@ -36,6 +37,12 @@ export default function RoadInGrovePassportTab({ stamps, syncing, onScan }) {
         <h3>{t("hub_card_festival_title")}</h3>
         <p>{t("rig_desc")}</p>
       </div>
+
+      <FestivalEventStatusCard
+        stampsCount={stamps.length}
+        festivalMeta={festivalMeta}
+        goldenBeerByDay={goldenBeerByDay}
+      />
 
       <div className="trail-header">{t("road_in_grove_progress")}</div>
       <div className="info-card">
