@@ -1,4 +1,4 @@
-import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import { useState } from "react";
 
 const pinPositions = {
   1: { left: "24%", top: "28%" },
@@ -10,54 +10,39 @@ const pinPositions = {
 
 export default function FestivalMapInteractive({ vendors, onVendorSelect }) {
   const proofOfConceptVendors = vendors.filter((vendor) => pinPositions[vendor.id]);
+  const [imageFailed, setImageFailed] = useState(false);
+  const mapSrc = `${import.meta.env.BASE_URL}festival-map.jpg`;
 
   return (
-    <div
-      style={{
-        width: "calc(100% - 40px)", // Match the margins of other cards
-        height: "400px", // Explicit hardcoded height
-        margin: "0 auto 30px",
-        borderRadius: "20px",
-        overflow: "hidden",
-        border: "2px solid var(--border)",
-        backgroundColor: "#EBE9E0", // Fallback color
-      }}
-    >
-      <TransformWrapper initialScale={1} minScale={1} maxScale={4} centerOnInit wheel={{ step: 0.2 }}>
-        {({ zoomIn, zoomOut, resetTransform }) => (
-          <>
-            <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }} contentStyle={{ width: "100%", height: "100%" }}>
-              <div style={{ position: "relative", width: "100%", height: "100%" }}>
-                {/* Ensure the image actually loads and fills the space */}
-                <img
-                  src="/festival-map.jpg"
-                  alt="Road In Grove Festival map"
-                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                  onError={(e) => {
-                    console.error("Failed to load map image");
-                    e.target.style.display = "none"; // Hide broken image icon
-                  }}
-                />
-                {proofOfConceptVendors.map((vendor) => (
-                  <button
-                    key={vendor.id}
-                    type="button"
-                    className="map-pin"
-                    style={{ ...pinPositions[vendor.id], position: "absolute" }}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onVendorSelect?.(vendor);
-                    }}
-                  >
-                    <div className="pin-dot"></div>
-                    <div className="pin-label">{vendor.name}</div>
-                  </button>
-                ))}
-              </div>
-            </TransformComponent>
-          </>
-        )}
-      </TransformWrapper>
+    <div className="island-container festival-map-shell">
+      {!imageFailed ? (
+        <img
+          src={mapSrc}
+          alt="Road In Grove Festival map"
+          className="festival-map-image"
+          onError={() => {
+            console.error("Failed to load map image");
+            setImageFailed(true);
+          }}
+        />
+      ) : (
+        <div className="festival-map-fallback">Festival map image unavailable.</div>
+      )}
+      {proofOfConceptVendors.map((vendor) => (
+        <button
+          key={vendor.id}
+          type="button"
+          className="map-pin"
+          style={{ ...pinPositions[vendor.id], position: "absolute" }}
+          onClick={(event) => {
+            event.stopPropagation();
+            onVendorSelect?.(vendor);
+          }}
+        >
+          <div className="pin-dot"></div>
+          <div className="pin-label">{vendor.name}</div>
+        </button>
+      ))}
     </div>
   );
 }
