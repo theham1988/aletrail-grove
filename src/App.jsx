@@ -25,7 +25,10 @@ export default function App() {
   const [authError, setAuthError] = useState("");
   const [activeTab, setActiveTab] = useState("hub");
   const [selectedPassport, setSelectedPassport] = useState(null);
+  const [showIntro, setShowIntro] = useState(true);
+  const [introMounted, setIntroMounted] = useState(false);
   const didCelebrate = useRef(false);
+  const introTimeoutRef = useRef(null);
 
   useEffect(() => {
     let alive = true;
@@ -99,6 +102,20 @@ export default function App() {
     setTimeout(burst, 200);
   }, [authReady, initialUserId]);
 
+  useEffect(() => {
+    if (authReady && !loading && showIntro) {
+      setIntroMounted(true);
+    }
+  }, [authReady, loading, showIntro]);
+
+  useEffect(() => {
+    return () => {
+      if (introTimeoutRef.current) {
+        window.clearTimeout(introTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const openPassport = (passportId) => {
     setSelectedPassport(passportId);
     if (passportId === "road_in_grove") {
@@ -128,6 +145,18 @@ export default function App() {
     if (vendor) {
       window.alert(`Stamped ${vendor.name} in ${vendor.activePassports.join(", ")}`);
     }
+  };
+
+  const handleIntroDismiss = () => {
+    if (!introMounted || !showIntro) return;
+    if (introTimeoutRef.current) {
+      window.clearTimeout(introTimeoutRef.current);
+    }
+    setShowIntro(false);
+    introTimeoutRef.current = window.setTimeout(() => {
+      setIntroMounted(false);
+      introTimeoutRef.current = null;
+    }, 500);
   };
 
   const activeView = useMemo(() => {
@@ -236,6 +265,22 @@ export default function App() {
 
           <main className="content-area">{activeView}</main>
           <BottomNav active={activeTab} onChange={handleBottomNavChange} items={bottomNavItems} />
+
+          {introMounted && (
+            <div className={`intro-overlay ${showIntro ? "visible" : "hidden"}`}>
+              <button type="button" className="intro-skip-btn pressable" onClick={handleIntroDismiss}>
+                Skip
+              </button>
+              <video
+                className="intro-video"
+                src="/intro.mp4"
+                autoPlay
+                muted
+                playsInline
+                onEnded={handleIntroDismiss}
+              />
+            </div>
+          )}
         </>
       )}
     </div>
