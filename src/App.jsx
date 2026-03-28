@@ -156,7 +156,7 @@ export default function App() {
     introTimeoutRef.current = window.setTimeout(() => {
       setIntroMounted(false);
       introTimeoutRef.current = null;
-    }, 500);
+    }, 800);
   };
 
   const activeView = useMemo(() => {
@@ -267,10 +267,26 @@ export default function App() {
           <BottomNav active={activeTab} onChange={handleBottomNavChange} items={bottomNavItems} />
 
           {introMounted && (
-            <div className={`intro-overlay ${showIntro ? "visible" : "hidden"}`}>
-              <button type="button" className="intro-skip-btn pressable" onClick={handleIntroDismiss}>
-                Skip
-              </button>
+            <div
+              className="intro-overlay"
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                zIndex: 9999,
+                backgroundColor: "#000",
+                opacity: showIntro ? 1 : 0,
+                transition: "opacity 0.8s ease-in-out",
+                pointerEvents: showIntro ? "all" : "none",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                paddingBottom: "60px",
+              }}
+            >
               <video
                 className="intro-video"
                 src="/intro.mp4"
@@ -278,7 +294,36 @@ export default function App() {
                 muted
                 playsInline
                 onEnded={handleIntroDismiss}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  zIndex: -1,
+                }}
               />
+              <button
+                type="button"
+                className="pressable"
+                onClick={handleIntroDismiss}
+                style={{
+                  backgroundColor: "var(--carnival-gold)",
+                  color: "var(--carnival-red)",
+                  border: "3px solid var(--carnival-red)",
+                  padding: "18px 36px",
+                  borderRadius: "16px",
+                  fontSize: "18px",
+                  fontWeight: "900",
+                  textTransform: "uppercase",
+                  letterSpacing: "2px",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
+                  zIndex: 10000,
+                }}
+              >
+                Enter Grove
+              </button>
             </div>
           )}
         </>
