@@ -12,25 +12,39 @@ export default function FestivalMapInteractive({ vendors, onVendorSelect }) {
   const proofOfConceptVendors = vendors.filter((vendor) => pinPositions[vendor.id]);
 
   return (
-    <div className="island-container h-full w-full overflow-hidden flex-1">
+    <>
+      {/* HARDCODE THE HEIGHT SO IT CANNOT COLLAPSE */}
+      <div
+        style={{
+          display: "block",
+          position: "relative",
+          width: "100%",
+          height: "450px",
+          borderRadius: "20px",
+          overflow: "hidden",
+          border: "2px solid var(--border)",
+        }}
+      >
       <TransformWrapper
-        minScale={1}
         initialScale={1}
-        maxScale={3}
+        minScale={1}
+        maxScale={4}
         centerOnInit
         wheel={{ step: 0.2 }}
-        wrapperStyle={{ width: "100%", height: "100%" }}
       >
-        <TransformComponent wrapperClass="festival-map-transform" contentClass="festival-map-content">
-          <div className="festival-map-stage">
-            <img src="/festival-map.jpg" alt="Road In Grove Festival map" className="festival-map-image" />
-
+        <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }} contentStyle={{ width: "100%", height: "100%" }}>
+          <div style={{ position: "relative", width: "100%", height: "100%" }}>
+            <img
+              src="/festival-map.jpg"
+              alt="Road In Grove Festival map"
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
             {proofOfConceptVendors.map((vendor) => (
               <button
                 key={vendor.id}
                 type="button"
                 className="map-pin"
-                style={pinPositions[vendor.id]}
+                style={{ ...pinPositions[vendor.id], position: "absolute" }}
                 onClick={(event) => {
                   event.stopPropagation();
                   onVendorSelect?.(vendor);
@@ -43,6 +57,7 @@ export default function FestivalMapInteractive({ vendors, onVendorSelect }) {
           </div>
         </TransformComponent>
       </TransformWrapper>
-    </div>
+      </div>
+    </>
   );
 }
