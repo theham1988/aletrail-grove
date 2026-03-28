@@ -10,7 +10,7 @@ export default function RoadInGrovePoursTab({ syncing, onScan }) {
   const [selectedVendor, setSelectedVendor] = useState(null);
 
   return (
-    <section className="carnival-scope">
+    <section className="carnival-scope pb-24">
       <VendorList vendors={vendors} onVendorSelect={setSelectedVendor} />
       <div className="scan-fab-wrap">
         <button type="button" className="scan-fab carnival pressable" onClick={onScan} disabled={syncing}>

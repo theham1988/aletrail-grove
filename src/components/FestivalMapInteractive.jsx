@@ -12,8 +12,15 @@ export default function FestivalMapInteractive({ vendors, onVendorSelect }) {
   const proofOfConceptVendors = vendors.filter((vendor) => pinPositions[vendor.id]);
 
   return (
-    <div className="island-container">
-      <TransformWrapper minScale={1} initialScale={1} maxScale={3} centerOnInit wheel={{ step: 0.2 }}>
+    <div className="island-container h-full w-full overflow-hidden flex-1">
+      <TransformWrapper
+        minScale={1}
+        initialScale={1}
+        maxScale={3}
+        centerOnInit
+        wheel={{ step: 0.2 }}
+        wrapperStyle={{ width: "100%", height: "100%" }}
+      >
         <TransformComponent wrapperClass="festival-map-transform" contentClass="festival-map-content">
           <div className="festival-map-stage">
             <img src="/festival-map.jpg" alt="Road In Grove Festival map" className="festival-map-image" />

@@ -26,7 +26,7 @@ export default function RoadInGrovePassportTab({ stamps, syncing, onScan }) {
   );
 
   return (
-    <section className="carnival-scope">
+    <section className="carnival-scope pb-24">
       <header className="experience-header-compact">
         <h1>{t("festival_passport")}</h1>
         <h2>{t("road_in_grove_progress")}</h2>
