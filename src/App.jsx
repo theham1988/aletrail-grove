@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import liff from "@line/liff";
 import confetti from "canvas-confetti";
 import { deleteDoc, doc } from "firebase/firestore";
+import { Beer, MapPinned, QrCode, House } from "lucide-react";
 import BottomNav from "./components/BottomNav";
 import { useLanguage } from "./contexts/LanguageContext";
 import { usePassportManager } from "./hooks/usePassportManager";
@@ -9,7 +10,9 @@ import { db } from "./lib/firebase";
 import AleTrailExperienceView from "./pages/AleTrailExperienceView";
 import HubView from "./pages/HubView";
 import ProfileView from "./pages/ProfileView";
-import RoadInGroveExperienceView from "./pages/RoadInGroveExperienceView";
+import RoadInGroveMapTab from "./pages/RoadInGroveMapTab";
+import RoadInGrovePassportTab from "./pages/RoadInGrovePassportTab";
+import RoadInGrovePoursTab from "./pages/RoadInGrovePoursTab";
 
 const LOCAL_USER_KEY = "rig_demo_user_id";
 const LIFF_ID = "2009417360-sriLePd1";
@@ -98,6 +101,10 @@ export default function App() {
 
   const openPassport = (passportId) => {
     setSelectedPassport(passportId);
+    if (passportId === "road_in_grove") {
+      setActiveTab("festival_map");
+      return;
+    }
     setActiveTab("passport");
   };
 
@@ -116,24 +123,25 @@ export default function App() {
     handleLogout();
   };
 
+  const handleScan = async () => {
+    const vendor = await scanAndApplyVendor();
+    if (vendor) {
+      window.alert(`Stamped ${vendor.name} in ${vendor.activePassports.join(", ")}`);
+    }
+  };
+
   const activeView = useMemo(() => {
     if (activeTab === "hub") {
       return <HubView onSelectPassport={openPassport} />;
     }
-    if (activeTab === "passport" && selectedPassport === "road_in_grove") {
-      return (
-        <RoadInGroveExperienceView
-          stamps={roadInGroveStamps}
-          syncing={syncing}
-          onBack={() => setActiveTab("hub")}
-          onScan={async () => {
-            const vendor = await scanAndApplyVendor();
-            if (vendor) {
-              window.alert(`Stamped ${vendor.name} in ${vendor.activePassports.join(", ")}`);
-            }
-          }}
-        />
-      );
+    if (selectedPassport === "road_in_grove" && activeTab === "festival_map") {
+      return <RoadInGroveMapTab syncing={syncing} onScan={handleScan} />;
+    }
+    if (selectedPassport === "road_in_grove" && activeTab === "festival_pours") {
+      return <RoadInGrovePoursTab syncing={syncing} onScan={handleScan} />;
+    }
+    if (selectedPassport === "road_in_grove" && activeTab === "festival_passport") {
+      return <RoadInGrovePassportTab stamps={roadInGroveStamps} syncing={syncing} onScan={handleScan} />;
     }
     if (activeTab === "passport" && selectedPassport === "ale_trail_v1") {
       return (
@@ -141,12 +149,7 @@ export default function App() {
           stamps={aleTrailStamps}
           syncing={syncing}
           onBack={() => setActiveTab("hub")}
-          onScan={async () => {
-            const vendor = await scanAndApplyVendor();
-            if (vendor) {
-              window.alert(`Stamped ${vendor.name} in ${vendor.activePassports.join(", ")}`);
-            }
-          }}
+          onScan={handleScan}
         />
       );
     }
@@ -181,11 +184,39 @@ export default function App() {
     profile.displayName,
     profile.pictureUrl,
     roadInGroveStamps,
-    scanAndApplyVendor,
     selectedPassport,
     syncing,
     t,
+    handleScan,
   ]);
+
+  const bottomNavItems = useMemo(() => {
+    if (selectedPassport === "road_in_grove" && activeTab.startsWith("festival_")) {
+      return [
+        { key: "festival_map", label: t("nav_map"), icon: MapPinned },
+        { key: "festival_pours", label: t("nav_pours"), icon: Beer },
+        { key: "festival_passport", label: t("nav_pass"), icon: QrCode },
+        { key: "hub", label: t("nav_hub"), icon: House },
+      ];
+    }
+
+    return undefined;
+  }, [activeTab, selectedPassport, t]);
+
+  const handleBottomNavChange = (nextTab) => {
+    if (nextTab === "hub") {
+      setSelectedPassport(null);
+      setActiveTab("hub");
+      return;
+    }
+
+    if (selectedPassport === "road_in_grove" && nextTab.startsWith("festival_")) {
+      setActiveTab(nextTab);
+      return;
+    }
+
+    setActiveTab(nextTab);
+  };
 
   return (
     <div className="app-container">
@@ -203,8 +234,8 @@ export default function App() {
           {authError && <p style={{ margin: "16px", color: "#b91c1c", fontSize: "13px", fontWeight: 700 }}>{authError}</p>}
           {error && <p style={{ margin: "16px", color: "#b91c1c", fontSize: "13px", fontWeight: 700 }}>{error}</p>}
 
-          <main className="content-area content-scroll">{activeView}</main>
-          <BottomNav active={activeTab} onChange={setActiveTab} />
+          <main className="content-area">{activeView}</main>
+          <BottomNav active={activeTab} onChange={handleBottomNavChange} items={bottomNavItems} />
         </>
       )}
     </div>

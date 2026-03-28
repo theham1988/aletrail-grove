@@ -105,10 +105,12 @@ export function usePassportManager(userId, authProfile) {
       };
 
       const updatedPassports = { ...existingPassports };
+      let addedNewStamp = false;
       for (const passportKey of vendor.activePassports) {
         const currentEntries = Array.isArray(updatedPassports[passportKey]) ? updatedPassports[passportKey] : [];
         if (!currentEntries.includes(vendor.id)) {
           updatedPassports[passportKey] = [...currentEntries, vendor.id].sort((a, b) => a - b);
+          addedNewStamp = true;
         }
       }
 
@@ -124,6 +126,9 @@ export function usePassportManager(userId, authProfile) {
       );
 
       setPassports(updatedPassports);
+      if (addedNewStamp && navigator.vibrate) {
+        navigator.vibrate([200]);
+      }
       return vendor;
     } catch (err) {
       setError(err?.message || "Scan failed.");

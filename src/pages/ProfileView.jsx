@@ -19,7 +19,7 @@ export default function ProfileView({
     <section>
       <header className="profile-header">
         <div className="profile-avatar">
-          {pictureUrl ? <img src={pictureUrl} alt={profileName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : profileInitial}
+          {pictureUrl ? <img src={pictureUrl} alt={profileName} /> : profileInitial}
         </div>
         <h1 className="profile-name">{profileName}</h1>
         <p className="profile-id">
@@ -58,7 +58,7 @@ export default function ProfileView({
         </div>
         <div className="settings-item">
           <strong>{t("mem_status")}</strong>
-          <span style={{ color: "var(--forest-light)", fontWeight: 800 }}>{t("active_status")}</span>
+          <span className="status-active">{t("active_status")}</span>
         </div>
         <div className="settings-item">
           <strong>{t("language")}</strong>

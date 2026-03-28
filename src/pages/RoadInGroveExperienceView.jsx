@@ -1,5 +1,7 @@
-import { useMemo, useState } from "react";
-import { ChevronRight, QrCode, Search } from "lucide-react";
+import { useState } from "react";
+import { MapPinned, QrCode, X } from "lucide-react";
+import FestivalMapInteractive from "../components/FestivalMapInteractive";
+import VendorList from "../components/VendorList";
 import vendors from "../data/vendors.json";
 import { useLanguage } from "../contexts/LanguageContext";
 
@@ -16,27 +18,23 @@ function getCurrentTier(totalStamps) {
 
 export default function RoadInGroveExperienceView({ stamps, syncing, onScan, onBack }) {
   const { t } = useLanguage();
-  const [query, setQuery] = useState("");
+  const [selectedVendor, setSelectedVendor] = useState(null);
 
   const currentTier = getCurrentTier(stamps.length);
   const previousTierTarget = tiers[tiers.findIndex((tier) => tier.id === currentTier.id) - 1]?.target || 0;
   const tierProgress = Math.min(100, Math.round(((stamps.length - previousTierTarget) / (currentTier.target - previousTierTarget)) * 100));
 
-  const filteredVendors = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return vendors;
-    return vendors.filter((vendor) => vendor.name.toLowerCase().includes(normalized));
-  }, [query]);
-
   const slotIds = Array.from({ length: currentTier.end - currentTier.start + 1 }, (_, index) => currentTier.start + index);
 
   return (
     <section className="carnival-scope">
-      <button type="button" className="btn-outline pressable" onClick={onBack} style={{ borderColor: "var(--primary)", color: "var(--primary)" }}>
-        {t("back_to_hub")}
-      </button>
+      <div className="back-button-wrap">
+        <button type="button" className="btn-outline pressable" onClick={onBack}>
+          {t("back_to_hub")}
+        </button>
+      </div>
 
-      <header style={{ padding: "24px 20px 12px", textAlign: "center" }}>
+      <header className="experience-header-compact">
         <h1>{t("coming_soon")}</h1>
         <h2>{t("rig_title")}</h2>
       </header>
@@ -46,60 +44,14 @@ export default function RoadInGroveExperienceView({ stamps, syncing, onScan, onB
         <p>{t("rig_desc")}</p>
       </div>
 
-      <img
-        src="/festival-map.jpg"
-        alt={t("festival_map")}
-        className="pressable"
-        style={{
-          width: "100%",
-          height: "220px",
-          borderRadius: "16px",
-          objectFit: "cover",
-          border: "1px solid var(--border)",
-          boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
-          marginBottom: "18px",
-        }}
-      />
+      <div className="trail-header">{t("festival_map")}</div>
+      <FestivalMapInteractive vendors={vendors} onVendorSelect={setSelectedVendor} />
 
+      <VendorList vendors={vendors} onVendorSelect={setSelectedVendor} />
+
+      <div className="trail-header">Road In Grove Progress</div>
       <div className="info-card">
-        <h3>{t("venue_header")}</h3>
-        <label
-          style={{
-            borderRadius: "10px",
-            border: "1px solid var(--border)",
-            background: "var(--bg-light)",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "8px 10px",
-            marginTop: "14px",
-          }}
-        >
-          <Search size={16} style={{ color: "var(--primary)" }} />
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={t("search_vendor")}
-            className="w-full bg-transparent text-sm outline-none"
-            style={{ color: "var(--text-main)" }}
-          />
-        </label>
-      </div>
-
-      <div className="trail-map" style={{ maxHeight: "32vh", overflowY: "auto", marginTop: "6px" }}>
-        {filteredVendors.map((vendor) => (
-          <article key={vendor.id} className="vendor-stop">
-            <h4 className="vendor-name">{vendor.name}</h4>
-            <span className="vendor-area">
-              {t("booth")} {vendor.booth || "TBA"}
-            </span>
-            <ChevronRight className="vendor-chevron" size={20} />
-          </article>
-        ))}
-      </div>
-
-      <div className="progress-wrap">
-        <div className="passport-header" style={{ marginBottom: "12px", paddingBottom: "10px" }}>
+        <div className="passport-header compact-passport-header">
           <span className="label">{currentTier.label} Progress</span>
           <span className="count-label">{tierProgress}%</span>
         </div>
@@ -124,12 +76,45 @@ export default function RoadInGroveExperienceView({ stamps, syncing, onScan, onB
         </div>
       </div>
 
-      <button type="button" className="scan-btn carnival pressable" onClick={onScan} disabled={syncing}>
-        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-          <QrCode size={18} />
-          {syncing ? t("syncing") : t("scan_btn")}
-        </span>
-      </button>
+      <div className="sticky-scan-wrap">
+        <button type="button" className="scan-btn carnival pressable" onClick={onScan} disabled={syncing}>
+          <span className="icon-label">
+            <QrCode size={18} />
+            {syncing ? t("syncing") : t("scan_btn")}
+          </span>
+        </button>
+      </div>
+
+      <div className={`overlay ${selectedVendor ? "open" : ""}`} onClick={() => setSelectedVendor(null)} />
+      <div className={`bottom-sheet ${selectedVendor ? "open" : ""}`}>
+        <button className="close-btn" onClick={() => setSelectedVendor(null)}>
+          <X size={16} />
+        </button>
+        <div className="sheet-area">
+          {t("booth")} {selectedVendor?.booth || "TBA"}
+        </div>
+        <h2 className="sheet-title">{selectedVendor?.name || ""}</h2>
+        <p className="sheet-desc">
+          {selectedVendor
+            ? `${selectedVendor.activePassports.length} active passport(s). Tap scan to collect eligible stamps.`
+            : ""}
+        </p>
+        <div className="beer-list">
+          <h4>{t("pouring")}</h4>
+          <ul>
+            {(selectedVendor?.beers || []).map((beer) => (
+              <li key={`${selectedVendor.id}-${beer.name}`}>
+                {beer.name} · {beer.style} · {beer.abv}
+              </li>
+            ))}
+            {selectedVendor && (!selectedVendor.beers || selectedVendor.beers.length === 0) && <li>Beer list coming soon</li>}
+          </ul>
+        </div>
+        <button className="dir-btn" onClick={() => setSelectedVendor(null)}>
+          <MapPinned size={16} />
+          Close
+        </button>
+      </div>
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { ChevronRight, MapPinned, QrCode, X } from "lucide-react";
+import { ChevronRight, QrCode } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
+import VendorDetailsDrawer from "../components/VendorDetailsDrawer";
 import { aleTrailVendors } from "../data/aleTrailVendors";
 
 export default function AleTrailExperienceView({ stamps, syncing, onScan, onBack }) {
@@ -12,11 +13,13 @@ export default function AleTrailExperienceView({ stamps, syncing, onScan, onBack
 
   return (
     <section>
-      <button type="button" className="btn-outline pressable" onClick={onBack}>
-        {t("back_to_hub")}
-      </button>
+      <div className="back-button-wrap">
+        <button type="button" className="btn-outline pressable" onClick={onBack}>
+          {t("back_to_hub")}
+        </button>
+      </div>
 
-      <header style={{ padding: "24px 20px 10px", textAlign: "center" }}>
+      <header className="experience-header-compact">
         <h1>{t("app_title")}</h1>
         <h2>{t("app_subtitle")}</h2>
       </header>
@@ -149,34 +152,21 @@ export default function AleTrailExperienceView({ stamps, syncing, onScan, onBack
         </div>
       </div>
 
-      <button type="button" className="scan-btn pressable" onClick={onScan} disabled={syncing}>
-        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-          <QrCode size={18} />
-          {syncing ? t("syncing") : t("scan_btn")}
-        </span>
-      </button>
-
-      <div className={`overlay ${selectedVendor ? "open" : ""}`} onClick={() => setSelectedVendor(null)} />
-      <div className={`bottom-sheet ${selectedVendor ? "open" : ""}`}>
-        <button className="close-btn" onClick={() => setSelectedVendor(null)}>
-          <X size={16} />
-        </button>
-        <div className="sheet-area">{selectedVendor?.area || ""}</div>
-        <h2 className="sheet-title">{selectedVendor?.name || ""}</h2>
-        <p className="sheet-desc">{selectedVendor?.desc || ""}</p>
-        <div className="beer-list">
-          <h4>{t("pouring")}</h4>
-          <ul>
-            {(selectedVendor?.beers || []).map((beer) => (
-              <li key={beer}>{beer}</li>
-            ))}
-          </ul>
-        </div>
-        <button className="dir-btn" onClick={() => selectedVendor?.maps && window.open(selectedVendor.maps, "_blank")}>
-          <MapPinned size={16} />
-          {t("get_dir")}
+      <div className="scan-fab-wrap">
+        <button type="button" className="scan-fab pressable" onClick={onScan} disabled={syncing}>
+          <span className="icon-label">
+            <QrCode size={18} />
+            {syncing ? t("syncing") : t("scan_btn")}
+          </span>
         </button>
       </div>
+
+      <VendorDetailsDrawer
+        vendor={selectedVendor}
+        onClose={() => setSelectedVendor(null)}
+        description={selectedVendor?.desc || ""}
+        directionsUrl={selectedVendor?.maps}
+      />
     </section>
   );
 }
