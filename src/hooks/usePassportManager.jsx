@@ -31,6 +31,8 @@ const DEFAULT_FESTIVAL_META = {
   goldenBeerWins: [],
 };
 
+const SCAN_CANCELLED = "scan_cancelled";
+
 const ALE_TRAIL_VALID_KEYS = new Set(aleTrailVendors.map((vendor) => vendor.key));
 
 function normalizeRoadInGroveStamps(raw) {
@@ -115,11 +117,26 @@ function resolveVendorFromScan(rawValue) {
 }
 
 async function scanQRCode() {
-  if (window.liff?.scanCodeV2) {
-    const result = await window.liff.scanCodeV2();
-    return result?.value || "";
+  const importedLiff = await import("@line/liff").then((module) => module.default).catch(() => null);
+  const liff = window.liff || importedLiff;
+  const useNativeScanner = Boolean(liff?.scanCodeV2 && typeof liff?.isInClient === "function" && liff.isInClient());
+
+  if (useNativeScanner) {
+    try {
+      const result = await liff.scanCodeV2();
+      const scannedValue = result?.value?.toString().trim();
+      return scannedValue || SCAN_CANCELLED;
+    } catch (error) {
+      const message = error?.message?.toLowerCase() || "";
+      if (message.includes("cancel") || message.includes("close") || message.includes("abort")) {
+        return SCAN_CANCELLED;
+      }
+      throw error;
+    }
   }
-  return window.prompt("Enter QR payload (vendor id or exact vendor name):") || "";
+
+  const manualValue = window.prompt("Enter QR payload (vendor id or exact vendor name):");
+  return manualValue?.toString().trim() || SCAN_CANCELLED;
 }
 
 function mergeGoldenBeerByDay(partial) {
@@ -269,6 +286,10 @@ export function usePassportManager(userId, authProfile) {
 
     try {
       const payload = await scanQRCode();
+      if (payload === SCAN_CANCELLED) {
+        setError("");
+        return { cancelled: true };
+      }
       const resolved = resolveVendorFromScan(payload);
 
       if (!resolved) throw new Error("Invalid or unofficial QR payload.");

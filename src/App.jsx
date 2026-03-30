@@ -1,21 +1,31 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import liff from "@line/liff";
-import confetti from "canvas-confetti";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { deleteDoc, doc } from "firebase/firestore";
 import { Beer, QrCode, House } from "lucide-react";
 import BottomNav from "./components/BottomNav";
 import { useLanguage } from "./contexts/LanguageContext";
 import { usePassportManager } from "./hooks/usePassportManager";
 import { db } from "./lib/firebase";
-import AleTrailExperienceView from "./pages/AleTrailExperienceView";
-import HubView from "./pages/HubView";
-import ProfileView from "./pages/ProfileView";
-import RoadInGrovePassportTab from "./pages/RoadInGrovePassportTab";
-import RoadInGrovePoursTab from "./pages/RoadInGrovePoursTab";
 
 const LOCAL_USER_KEY = "rig_demo_user_id";
 const LIFF_PROFILE_CACHE_KEY = "rig_liff_profile_cache";
+const APP_CACHE_VERSION_KEY = "rig_app_cache_version";
+const APP_CACHE_VERSION = "2026-03-27-auth-cache-v3";
 const LIFF_ID = "2009417360-sriLePd1";
+
+const AleTrailExperienceView = lazy(() => import("./pages/AleTrailExperienceView"));
+const HubView = lazy(() => import("./pages/HubView"));
+const ProfileView = lazy(() => import("./pages/ProfileView"));
+const RoadInGrovePassportTab = lazy(() => import("./pages/RoadInGrovePassportTab"));
+const RoadInGrovePoursTab = lazy(() => import("./pages/RoadInGrovePoursTab"));
+
+let liffPromise;
+
+function getLiff() {
+  if (!liffPromise) {
+    liffPromise = import("@line/liff").then((module) => module.default);
+  }
+  return liffPromise;
+}
 
 function readCachedLiffProfile() {
   try {
@@ -23,6 +33,15 @@ function readCachedLiffProfile() {
     return cached ? JSON.parse(cached) : null;
   } catch {
     return null;
+  }
+}
+
+function clearSessionCache() {
+  try {
+    localStorage.removeItem(LIFF_PROFILE_CACHE_KEY);
+    localStorage.removeItem(LOCAL_USER_KEY);
+  } catch {
+    // Ignore localStorage failures so logout still proceeds.
   }
 }
 
@@ -35,9 +54,22 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("hub");
   const [selectedPassport, setSelectedPassport] = useState(null);
   const [showIntro, setShowIntro] = useState(true);
-  const [introMounted, setIntroMounted] = useState(false);
+  const [introMounted, setIntroMounted] = useState(true);
+  const [introVideoReady, setIntroVideoReady] = useState(false);
   const didCelebrate = useRef(false);
   const introTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      const cachedVersion = localStorage.getItem(APP_CACHE_VERSION_KEY);
+      if (cachedVersion !== APP_CACHE_VERSION) {
+        localStorage.setItem(APP_CACHE_VERSION_KEY, APP_CACHE_VERSION);
+        localStorage.removeItem(LIFF_PROFILE_CACHE_KEY);
+      }
+    } catch {
+      // Ignore cache-version bootstrap failures.
+    }
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -64,7 +96,16 @@ export default function App() {
           return;
         }
 
+        const liff = await getLiff();
+        window.liff = liff;
         await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
+        if (liff.isInClient()) {
+          if (alive) {
+            setShowIntro(false);
+            setIntroMounted(false);
+            setIntroVideoReady(false);
+          }
+        }
         if (liff.isLoggedIn()) {
           const decodedToken = liff.getDecodedIDToken();
           const context = liff.getContext();
@@ -114,7 +155,7 @@ export default function App() {
             displayName: cachedProfile.displayName || "Festival Explorer",
             pictureUrl: cachedProfile.pictureUrl || "",
           });
-          setAuthError("LINE fetch failed. Using cached profile.");
+          setAuthError("");
         } else if (alive) {
           setAuthError(error?.message || "Failed to initialize LINE login.");
         }
@@ -139,46 +180,44 @@ export default function App() {
     if (!authReady || !initialUserId || didCelebrate.current) return;
     didCelebrate.current = true;
 
-    const burst = () =>
+    let cancelled = false;
+    let secondBurstTimeout = null;
+
+    const burst = async () => {
+      const { default: confetti } = await import("canvas-confetti");
+      if (cancelled) return;
       confetti({
         particleCount: 160,
         spread: 100,
         origin: { y: 0.6 },
         scalar: 1.1,
       });
+    };
 
     burst();
-    setTimeout(burst, 200);
-  }, [authReady, initialUserId]);
+    secondBurstTimeout = window.setTimeout(() => {
+      burst();
+    }, 200);
 
-  useEffect(() => {
-    if (authReady && !loading && showIntro) {
-      setIntroMounted(true);
-    }
-  }, [authReady, loading, showIntro]);
-
-  useEffect(() => {
     return () => {
-      if (introTimeoutRef.current) {
-        window.clearTimeout(introTimeoutRef.current);
+      cancelled = true;
+      if (secondBurstTimeout) {
+        window.clearTimeout(secondBurstTimeout);
       }
     };
-  }, []);
+  }, [authReady, initialUserId]);
 
-  const openPassport = (passportId) => {
-    setSelectedPassport(passportId);
-    if (passportId === "road_in_grove") {
-      setActiveTab("festival_pours");
-      return;
+  const handleLogout = async () => {
+    clearSessionCache();
+    try {
+      const liff = await getLiff();
+      if (window.self === window.top && liff.isLoggedIn()) {
+        liff.logout();
+      }
+    } catch {
+      // Ignore logout failures and still refresh to a clean app state.
     }
-    setActiveTab("passport");
-  };
-
-  const handleLogout = () => {
-    if (window.self === window.top && liff.isLoggedIn()) {
-      liff.logout();
-    }
-    window.location.href = window.location.origin + window.location.pathname;
+    window.location.replace(window.location.origin + window.location.pathname);
   };
 
   const handleDeleteAccount = async () => {
@@ -191,6 +230,10 @@ export default function App() {
 
   const handleScan = async () => {
     const result = await scanAndApplyVendor();
+    if (!result || result.cancelled) {
+      return;
+    }
+
     if (result?.vendor) {
       if (result.goldenBeerWon) {
         window.alert(`${t("golden_beer_found_title")}\n\n${t("golden_beer_found_desc")}`);
@@ -220,6 +263,30 @@ export default function App() {
         `${t("scan_single_stamp_title")}\n\n${t("scan_single_stamp_desc").replace("{vendor}", result.vendor.name)}`,
       );
     }
+  };
+
+  useEffect(() => {
+    if (authReady && !loading && showIntro) {
+      setIntroVideoReady(false);
+      setIntroMounted(true);
+    }
+  }, [authReady, loading, showIntro]);
+
+  useEffect(() => {
+    return () => {
+      if (introTimeoutRef.current) {
+        window.clearTimeout(introTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const openPassport = (passportId) => {
+    setSelectedPassport(passportId);
+    if (passportId === "road_in_grove") {
+      setActiveTab("festival_pours");
+      return;
+    }
+    setActiveTab("passport");
   };
 
   const handleIntroDismiss = () => {
@@ -329,8 +396,8 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
-      {(!authReady || loading) && (
+    <div className="app-container" style={{ backgroundColor: showIntro ? "#000" : undefined }}>
+      {(!authReady || loading) && !introMounted && (
         <div className="content-area" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
           <div className="countdown-box">
             <span className="countdown-label">{window.self !== window.top ? t("mock_mode") : t("syncing")}</span>
@@ -344,7 +411,18 @@ export default function App() {
           {authError && <p style={{ margin: "16px", color: "#b91c1c", fontSize: "13px", fontWeight: 700 }}>{authError}</p>}
           {error && <p style={{ margin: "16px", color: "#b91c1c", fontSize: "13px", fontWeight: 700 }}>{error}</p>}
 
-          <main className="content-area">{activeView}</main>
+          <main className="content-area">
+            <Suspense
+              fallback={
+                <div className="info-card">
+                  <h3>{t("current_passport")}</h3>
+                  <p>{t("syncing")}</p>
+                </div>
+              }
+            >
+              {activeView}
+            </Suspense>
+          </main>
           <BottomNav active={activeTab} onChange={handleBottomNavChange} items={bottomNavItems} />
 
           {introMounted && (
@@ -359,7 +437,7 @@ export default function App() {
                 zIndex: 9999,
                 backgroundColor: "#000",
                 opacity: showIntro ? 1 : 0,
-                transition: "opacity 0.8s ease-in-out",
+                transition: showIntro ? "none" : "opacity 0.8s ease-in-out",
                 pointerEvents: showIntro ? "all" : "none",
                 display: "flex",
                 flexDirection: "column",
@@ -374,6 +452,8 @@ export default function App() {
                 autoPlay
                 muted
                 playsInline
+                onLoadedData={() => setIntroVideoReady(true)}
+                onError={() => setIntroVideoReady(true)}
                 onEnded={handleIntroDismiss}
                 style={{
                   position: "absolute",
@@ -383,6 +463,8 @@ export default function App() {
                   height: "100%",
                   objectFit: "cover",
                   zIndex: -1,
+                  opacity: introVideoReady ? 1 : 0,
+                  transition: "opacity 0.2s ease-in-out",
                 }}
               />
               <button
@@ -401,6 +483,8 @@ export default function App() {
                   letterSpacing: "2px",
                   boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
                   zIndex: 10000,
+                  opacity: introVideoReady ? 1 : 0,
+                  transition: "opacity 0.2s ease-in-out",
                 }}
               >
                 Enter Grove
