@@ -3,7 +3,7 @@
     "id": 1,
     "name": "Triple Pearl",
     "booth": "B41",
-    "activePassports": ["road_in_grove", "ale_trail_v1"],
+    "activePassports": ["road_in_grove"],
     "beers": [
       { "name": "Andaman Haze", "style": "IPA", "abv": "6.2%" },
       { "name": "Coconut Coast Lager", "style": "Lager", "abv": "4.8%" },
@@ -14,7 +14,7 @@
     "id": 2,
     "name": "Wizard",
     "booth": "B42",
-    "activePassports": ["road_in_grove", "ale_trail_v1"],
+    "activePassports": ["road_in_grove"],
     "beers": [
       { "name": "Spellbound IPA", "style": "IPA", "abv": "6.8%" },
       { "name": "Midnight Familiar", "style": "Stout", "abv": "7.1%" },
@@ -25,7 +25,7 @@
     "id": 3,
     "name": "Chitbeer",
     "booth": "B22",
-    "activePassports": ["road_in_grove", "ale_trail_v1"],
+    "activePassports": ["road_in_grove"],
     "beers": [
       { "name": "Bangkok Pale", "style": "Pale Ale", "abv": "5.5%" },
       { "name": "Tropical Thunder", "style": "IPA", "abv": "6.4%" },
@@ -47,7 +47,7 @@
     "id": 5,
     "name": "Vanorn",
     "booth": "",
-    "activePassports": ["road_in_grove", "ale_trail_v1"],
+    "activePassports": ["road_in_grove"],
     "beers": [
       { "name": "Forest Trail IPA", "style": "IPA", "abv": "6.0%" },
       { "name": "Palm Sugar Porter", "style": "Porter", "abv": "6.6%" },
@@ -55,7 +55,7 @@
     ]
   },
   { "id": 6, "name": "Brewbridge", "booth": "B32", "activePassports": ["road_in_grove", "ale_trail_v1"], "beers": [] },
-  { "id": 7, "name": "Beerfest", "booth": "B12", "activePassports": ["road_in_grove"], "beers": [] },
+  { "id": 7, "name": "Beerfest", "booth": "B12", "activePassports": ["road_in_grove", "ale_trail_v1"], "beers": [] },
   { "id": 8, "name": "Cozy Wine", "booth": "", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 9, "name": "Steel & Bone", "booth": "B38", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 10, "name": "Dibuk", "booth": "", "activePassports": ["road_in_grove"], "beers": [] },
@@ -96,6 +96,6 @@
   { "id": 45, "name": "HJB", "booth": "", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 46, "name": "Azytone", "booth": "B27", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 47, "name": "Jo+ Beer", "booth": "B25", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 48, "name": "Chalong Bay Rum", "booth": "B14", "activePassports": ["road_in_grove"], "beers": [] },
+  { "id": 48, "name": "Chalong Bay Rum", "booth": "B14", "activePassports": ["road_in_grove", "ale_trail_v1"], "beers": [] },
   { "id": 49, "name": "ISLE Craft Cider", "booth": "B33", "activePassports": ["road_in_grove"], "beers": [] }
 ]

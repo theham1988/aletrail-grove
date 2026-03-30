@@ -2,6 +2,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { doc, getDoc, runTransaction, serverTimestamp, setDoc } from "firebase/firestore";
 import vendors from "../data/vendors.json";
 import {
+  ALE_TRAIL_MAX_STAMPS_PER_STOP,
+  ALE_TRAIL_TOTAL_STAMPS,
+  aleTrailStopByFestivalVendorId,
+  aleTrailStopByKey,
+  aleTrailStopPayloads,
+  aleTrailVendors,
+} from "../data/aleTrailVendors";
+import {
   FESTIVAL_ELIGIBILITY_STAMPS,
   FESTIVAL_EVENT_KEY,
   buildDefaultGoldenBeerByDay,
@@ -23,13 +31,87 @@ const DEFAULT_FESTIVAL_META = {
   goldenBeerWins: [],
 };
 
+const ALE_TRAIL_VALID_KEYS = new Set(aleTrailVendors.map((vendor) => vendor.key));
+
+function normalizeRoadInGroveStamps(raw) {
+  if (!Array.isArray(raw)) return [];
+
+  return [...new Set(raw.map((value) => Number(value)).filter((value) => Number.isInteger(value) && value > 0))].sort(
+    (a, b) => a - b,
+  );
+}
+
+function normalizeAleTrailStamps(raw) {
+  if (!Array.isArray(raw)) return [];
+
+  const normalized = [];
+
+  const resolveStopKey = (entry) => {
+    if (typeof entry === "string") {
+      if (ALE_TRAIL_VALID_KEYS.has(entry)) return entry;
+      const numericValue = Number(entry);
+      if (Number.isInteger(numericValue)) {
+        return aleTrailStopByFestivalVendorId[numericValue]?.key || null;
+      }
+      return null;
+    }
+
+    if (typeof entry === "number") {
+      return aleTrailStopByFestivalVendorId[entry]?.key || null;
+    }
+
+    return null;
+  };
+
+  for (const entry of raw) {
+    if (normalized.length >= ALE_TRAIL_TOTAL_STAMPS) break;
+
+    const stopKey = resolveStopKey(entry);
+    if (!stopKey || !ALE_TRAIL_VALID_KEYS.has(stopKey)) continue;
+
+    const existingCount = normalized.filter((value) => value === stopKey).length;
+    if (existingCount >= ALE_TRAIL_MAX_STAMPS_PER_STOP) continue;
+
+    normalized.push(stopKey);
+  }
+
+  return normalized;
+}
+
 function resolveVendorFromScan(rawValue) {
   const payload = rawValue?.toString().trim();
   if (!payload) return null;
 
   const vendorId = secureFestivalQRCodes[payload];
-  if (!vendorId) return null;
-  return vendors.find((vendor) => vendor.id === vendorId) || null;
+  if (vendorId) {
+    const festivalVendor = vendors.find((vendor) => vendor.id === vendorId) || null;
+    const aleTrailStop =
+      festivalVendor?.activePassports?.includes("ale_trail_v1") && festivalVendor?.id
+        ? aleTrailStopByFestivalVendorId[festivalVendor.id] || null
+        : null;
+
+    return {
+      festivalVendor,
+      aleTrailStop,
+      displayVendor: festivalVendor,
+    };
+  }
+
+  const aleTrailStopKey = aleTrailStopPayloads[payload];
+  if (!aleTrailStopKey) return null;
+
+  const aleTrailStop = aleTrailStopByKey[aleTrailStopKey] || null;
+  if (!aleTrailStop) return null;
+
+  return {
+    festivalVendor: null,
+    aleTrailStop,
+    displayVendor: {
+      id: aleTrailStop.key,
+      name: aleTrailStop.name,
+      activePassports: ["ale_trail_v1"],
+    },
+  };
 }
 
 async function scanQRCode() {
@@ -99,6 +181,8 @@ export function usePassportManager(userId, authProfile) {
         ...DEFAULT_PASSPORTS,
         ...(typeof data.passports === "object" && data.passports ? data.passports : {}),
       };
+      nextPassports.road_in_grove = normalizeRoadInGroveStamps(nextPassports.road_in_grove);
+      nextPassports.ale_trail_v1 = normalizeAleTrailStamps(nextPassports.ale_trail_v1);
 
       setProfile({
         displayName: data.displayName || "Festival Explorer",
@@ -185,9 +269,11 @@ export function usePassportManager(userId, authProfile) {
 
     try {
       const payload = await scanQRCode();
-      const vendor = resolveVendorFromScan(payload);
+      const resolved = resolveVendorFromScan(payload);
 
-      if (!vendor) throw new Error("Invalid or unofficial QR payload.");
+      if (!resolved) throw new Error("Invalid or unofficial QR payload.");
+
+      const { festivalVendor, aleTrailStop, displayVendor } = resolved;
 
       const snapshot = await getDoc(userRef);
       const data = snapshot.exists() ? snapshot.data() : {};
@@ -197,6 +283,8 @@ export function usePassportManager(userId, authProfile) {
         ...DEFAULT_PASSPORTS,
         ...(typeof data.passports === "object" && data.passports ? data.passports : {}),
       };
+      existingPassports.road_in_grove = normalizeRoadInGroveStamps(existingPassports.road_in_grove);
+      existingPassports.ale_trail_v1 = normalizeAleTrailStamps(existingPassports.ale_trail_v1);
       const existingFestivalMeta = {
         ...DEFAULT_FESTIVAL_META,
         ...(typeof data.festivalMeta === "object" && data.festivalMeta ? data.festivalMeta : {}),
@@ -206,12 +294,29 @@ export function usePassportManager(userId, authProfile) {
       const updatedPassports = { ...existingPassports };
       const addedPassportKeys = [];
       let addedNewStamp = false;
-      for (const passportKey of vendor.activePassports) {
-        const currentEntries = Array.isArray(updatedPassports[passportKey]) ? updatedPassports[passportKey] : [];
-        if (!currentEntries.includes(vendor.id)) {
-          updatedPassports[passportKey] = [...currentEntries, vendor.id].sort((a, b) => a - b);
+      let aleTrailStampBlockedReason = "";
+
+      if (festivalVendor?.activePassports?.includes("road_in_grove")) {
+        const currentEntries = normalizeRoadInGroveStamps(updatedPassports.road_in_grove);
+        if (!currentEntries.includes(festivalVendor.id)) {
+          updatedPassports.road_in_grove = [...currentEntries, festivalVendor.id].sort((a, b) => a - b);
           addedNewStamp = true;
-          addedPassportKeys.push(passportKey);
+          addedPassportKeys.push("road_in_grove");
+        }
+      }
+
+      if (aleTrailStop) {
+        const currentTrailEntries = normalizeAleTrailStamps(updatedPassports.ale_trail_v1);
+        const currentStopCount = currentTrailEntries.filter((entry) => entry === aleTrailStop.key).length;
+
+        if (currentTrailEntries.length >= ALE_TRAIL_TOTAL_STAMPS) {
+          aleTrailStampBlockedReason = "passport_full";
+        } else if (currentStopCount >= ALE_TRAIL_MAX_STAMPS_PER_STOP) {
+          aleTrailStampBlockedReason = "stop_full";
+        } else {
+          updatedPassports.ale_trail_v1 = [...currentTrailEntries, aleTrailStop.key];
+          addedNewStamp = true;
+          addedPassportKeys.push("ale_trail_v1");
         }
       }
 
@@ -227,7 +332,7 @@ export function usePassportManager(userId, authProfile) {
       let nextGoldenBeerByDay = goldenBeerByDay;
 
       const currentDayKey = eventStatus.isLive ? eventStatus.currentDayKey : null;
-      const isFestivalRoadInGroveScan = vendor.activePassports.includes("road_in_grove") && currentDayKey;
+      const isFestivalRoadInGroveScan = festivalVendor?.activePassports?.includes("road_in_grove") && currentDayKey;
 
       if (isFestivalRoadInGroveScan) {
         const roadInGroveCount = (updatedPassports.road_in_grove || []).length;
@@ -235,7 +340,7 @@ export function usePassportManager(userId, authProfile) {
         updatedScanHistory = [
           ...existingScanHistory,
           {
-            vendorId: vendor.id,
+            vendorId: festivalVendor.id,
             passportKey: "road_in_grove",
             scannedAt: new Date().toISOString(),
             dayKey: currentDayKey,
@@ -254,7 +359,7 @@ export function usePassportManager(userId, authProfile) {
           }
         }
 
-        const goldenBeerResult = await claimGoldenBeerWin({ dayKey: currentDayKey, vendorId: vendor.id });
+        const goldenBeerResult = await claimGoldenBeerWin({ dayKey: currentDayKey, vendorId: festivalVendor.id });
         goldenBeerWon = Boolean(goldenBeerResult.won);
         nextGoldenBeerByDay = mergeGoldenBeerByDay(goldenBeerResult.goldenBeerByDay);
 
@@ -284,8 +389,10 @@ export function usePassportManager(userId, authProfile) {
         navigator.vibrate([200]);
       }
       return {
-        vendor,
+        vendor: displayVendor,
         addedNewStamp,
+        addedPassportKeys,
+        aleTrailStampBlockedReason,
         eligibilityUnlocked,
         enteredDailyDraw,
         goldenBeerWon,

@@ -11,7 +11,7 @@ export const i18n = {
     app_subtitle: "Road to Grove",
     explore_title: "Your VIP Journey Starts Here",
     explore_desc:
-      "Visit all 6 participating local venues, scan their QR code to collect a digital stamp, and unlock exclusive VIP rewards at the Grove Phuket Craft Beer Festival this April!",
+      "Explore 8 verified Phuket stops, collect up to 2 stamps per location, and finish the Ale Trail once you reach 6 total stamps.",
     map_header: "Interactive Island Map",
     venue_header: "Venue Directory",
     welcome: "Cheers,",
@@ -27,7 +27,7 @@ export const i18n = {
     curr_trail: "Current Trail",
     active: "Active",
     rtg_title: "Road to Grove",
-    rtg_desc: "Visit 6 local venues around Phuket to unlock VIP access to the Grove Festival.",
+    rtg_desc: "Visit verified Phuket Ale Trail stops, collect 6 total stamps, and unlock your Ale Trail finish.",
     coming_soon: "Coming Soon",
     rig_title: "Road In Grove Festival",
     rig_desc:
@@ -68,11 +68,17 @@ export const i18n = {
     hub_subtitle: "Festival Hub",
     hub_desc: "Select a passport experience to explore, scan, and unlock rewards.",
     hub_card_festival_title: "Road in Grove: Festival Edition",
+    hub_card_festival_dates: "Apr 3-5, 2026",
     hub_card_festival_desc:
-      "A 49-vendor festival passport with carnival energy, milestone rewards, and live event progress.",
+      "A 49-vendor festival passport running opening weekend with milestone rewards and live event progress.",
     hub_card_trail_title: "Phuket Ale Trail: First Edition",
+    hub_card_trail_dates: "Apr 3-Jul 3, 2026",
     hub_card_trail_desc:
-      "The original 6-stop journey across Phuket with the interactive island map and classic stamp progression.",
+      "An 8-stop Phuket trail where every location can give up to 2 stamps and 6 total stamps completes the passport.",
+    hub_shared_bonus_title: "Shared Phuket stop bonus",
+    hub_shared_bonus_desc:
+      "Only 4 Phuket Grove vendors overlap with the Ale Trail, and those shared scans can award one Festival stamp and one Ale Trail stamp at once.",
+    hub_double_stamp_badge: "2x eligible",
     open_passport: "Open Passport",
     back_to_hub: "Back to Hub",
     current_passport: "Current Passport",
@@ -114,7 +120,15 @@ export const i18n = {
     festival_overall_entry_ready: "You are in the overall festival winner pool.",
     festival_entry_progress: "Reach 6 stamps to enter the winner draws.",
     golden_beer_found_title: "Golden Beer Found",
-    golden_beer_found_desc: "Today's golden beer surprise is yours. Show this win to the team to claim your prize."
+    golden_beer_found_desc: "Today's golden beer surprise is yours. Show this win to the team to claim your prize.",
+    scan_dual_stamp_title: "Double stamp unlocked",
+    scan_dual_stamp_desc:
+      "{vendor} counts for both active passports, so you just collected one Festival stamp and one Ale Trail stamp.",
+    scan_single_stamp_title: "Stamp collected",
+    scan_single_stamp_desc: "{vendor} has been added to your active passport.",
+    scan_no_stamp_title: "Stamp limit reached",
+    scan_no_stamp_desc: "{vendor} has already given you the allowed stamps for now.",
+    ale_trail_two_stamp_rule: "Each Ale Trail stop can award up to 2 stamps. Reach 6 total stamps to complete the passport."
   },
   th: {
     syncing: "กำลังซิงค์ข้อมูล...",
@@ -128,7 +142,7 @@ export const i18n = {
     app_subtitle: "Road to Grove",
     explore_title: "เส้นทาง VIP เริ่มที่นี่",
     explore_desc:
-      "เยี่ยมชมร้านท้องถิ่นทั้ง 6 แห่ง สแกน QR Code เพื่อสะสมแสตมป์ และปลดล็อกรางวัล VIP พิเศษที่เทศกาล Grove Phuket เมษายนนี้!",
+      "ออกสำรวจ 8 จุดคราฟต์ที่ยืนยันแล้วในภูเก็ต รับแสตมป์ได้สูงสุด 2 ดวงต่อสถานที่ และเมื่อครบ 6 ดวงก็ถือว่าจบ Ale Trail",
     map_header: "แผนที่เกาะอินเทอร์แอคทีฟ",
     venue_header: "รายชื่อสถานที่",
     welcome: "ชนแก้ว,",
@@ -143,7 +157,7 @@ export const i18n = {
     curr_trail: "เส้นทางปัจจุบัน",
     active: "กำลังใช้งาน",
     rtg_title: "Road to Grove",
-    rtg_desc: "เยี่ยมชม 6 ร้านรอบภูเก็ตเพื่อปลดล็อกสิทธิ์ VIP สู่เทศกาล Grove",
+    rtg_desc: "ไปยังจุด Ale Trail ที่ยืนยันแล้วในภูเก็ต เก็บให้ครบ 6 แสตมป์รวม เพื่อปิดพาสปอร์ต Ale Trail",
     coming_soon: "เร็วๆ นี้",
     rig_title: "เทศกาล Road In Grove",
     rig_desc:
@@ -184,9 +198,15 @@ export const i18n = {
     hub_subtitle: "ศูนย์กลางเทศกาล",
     hub_desc: "เลือกพาสปอร์ตที่ต้องการสำรวจ สแกน และปลดล็อกรางวัล",
     hub_card_festival_title: "Road in Grove: Festival Edition",
-    hub_card_festival_desc: "พาสปอร์ตเทศกาล 49 ผู้ขาย พร้อมรางวัลตามขั้นและบรรยากาศงานคาร์นิวัล",
+    hub_card_festival_dates: "3-5 เม.ย. 2026",
+    hub_card_festival_desc: "พาสปอร์ตเทศกาล 49 บูธในช่วงสุดสัปดาห์เปิดงาน พร้อมรางวัลตามขั้นและความคืบหน้าแบบสด",
     hub_card_trail_title: "Phuket Ale Trail: First Edition",
-    hub_card_trail_desc: "เส้นทางดั้งเดิม 6 จุดรอบภูเก็ต พร้อมแผนที่เกาะแบบอินเทอร์แอคทีฟ",
+    hub_card_trail_dates: "3 เม.ย.-3 ก.ค. 2026",
+    hub_card_trail_desc: "เส้นทาง 8 จุดทั่วภูเก็ตที่แต่ละสถานที่รับได้สูงสุด 2 แสตมป์ และครบ 6 แสตมป์เมื่อใดก็จบพาสปอร์ต",
+    hub_shared_bonus_title: "โบนัสจุดแวะภูเก็ตร่วมกัน",
+    hub_shared_bonus_desc:
+      "มีเพียง 4 ร้าน Grove ในภูเก็ตที่ทับซ้อนกับ Ale Trail และการสแกนร่วมเหล่านั้นจะให้ทั้งแสตมป์ Festival และ Ale Trail พร้อมกัน",
+    hub_double_stamp_badge: "รับ 2x",
     open_passport: "เปิดพาสปอร์ต",
     back_to_hub: "กลับสู่ฮับ",
     current_passport: "พาสปอร์ตปัจจุบัน",
@@ -204,7 +224,15 @@ export const i18n = {
     hub: "ฮับ",
     booth: "บูธ",
     current_tier_slots: "ช่องแสตมป์ของระดับปัจจุบัน",
-    search_vendor: "ค้นหาผู้ขาย..."
+    search_vendor: "ค้นหาผู้ขาย...",
+    scan_dual_stamp_title: "รับแสตมป์คู่แล้ว",
+    scan_dual_stamp_desc:
+      "{vendor} นับพร้อมกันสำหรับพาสปอร์ตที่ใช้งานอยู่ทั้งสองใบ คุณจึงได้รับแสตมป์ Festival 1 ดวงและ Ale Trail 1 ดวง",
+    scan_single_stamp_title: "รับแสตมป์แล้ว",
+    scan_single_stamp_desc: "{vendor} ถูกเพิ่มลงในพาสปอร์ตที่ใช้งานอยู่ของคุณแล้ว",
+    scan_no_stamp_title: "ถึงลิมิตแสตมป์แล้ว",
+    scan_no_stamp_desc: "{vendor} ได้ให้แสตมป์ตามจำนวนที่อนุญาตสำหรับตอนนี้ครบแล้ว",
+    ale_trail_two_stamp_rule: "แต่ละจุดใน Ale Trail รับได้สูงสุด 2 แสตมป์ และเมื่อครบ 6 แสตมป์จะถือว่าจบพาสปอร์ต"
   },
   ru: {
     syncing: "Синхронизация данных...",
@@ -218,7 +246,7 @@ export const i18n = {
     app_subtitle: "Road to Grove",
     explore_title: "Ваш VIP-маршрут начался",
     explore_desc:
-      "Посетите все 6 заведений, отсканируйте их QR-код для получения печати и разблокируйте эксклюзивные VIP-награды на фестивале в апреле!",
+      "Открывайте 8 подтвержденных точек Пхукета, получайте до 2 печатей в каждой локации и завершайте Ale Trail, когда наберёте 6 печатей.",
     map_header: "Карта острова",
     venue_header: "Список заведений",
     welcome: "Ваше здоровье,",
@@ -234,7 +262,7 @@ export const i18n = {
     curr_trail: "Текущий маршрут",
     active: "Активен",
     rtg_title: "Road to Grove",
-    rtg_desc: "Посетите 6 местных баров на Пхукете, чтобы получить VIP-доступ.",
+    rtg_desc: "Посещайте подтвержденные точки Ale Trail на Пхукете, соберите 6 печатей и закройте паспорт Ale Trail.",
     coming_soon: "Скоро",
     rig_title: "Фестиваль Road In Grove",
     rig_desc:
@@ -275,9 +303,15 @@ export const i18n = {
     hub_subtitle: "Фестивальный хаб",
     hub_desc: "Выберите паспорт, чтобы исследовать точки, сканировать коды и открывать награды.",
     hub_card_festival_title: "Road in Grove: Festival Edition",
-    hub_card_festival_desc: "Фестивальный паспорт на 49 участников с этапами и праздничной атмосферой.",
+    hub_card_festival_dates: "3-5 апр. 2026",
+    hub_card_festival_desc: "Фестивальный паспорт на 49 участников на стартовый уикенд с этапами и живым прогрессом.",
     hub_card_trail_title: "Phuket Ale Trail: First Edition",
-    hub_card_trail_desc: "Оригинальный маршрут из 6 точек с интерактивной картой острова.",
+    hub_card_trail_dates: "3 апр.-3 июл. 2026",
+    hub_card_trail_desc: "Маршрут по 8 точкам Пхукета, где каждая локация может дать до 2 печатей, а паспорт закрывается на 6 печатях.",
+    hub_shared_bonus_title: "Общий бонус пхукетских точек",
+    hub_shared_bonus_desc:
+      "Только 4 пхукетских участника Grove пересекаются с Ale Trail, и эти общие сканы могут сразу дать одну фестивальную печать и одну печать Ale Trail.",
+    hub_double_stamp_badge: "2x доступно",
     open_passport: "Открыть паспорт",
     back_to_hub: "Назад в хаб",
     current_passport: "Текущий паспорт",
@@ -295,6 +329,14 @@ export const i18n = {
     hub: "Хаб",
     booth: "Стенд",
     current_tier_slots: "Слоты текущего этапа",
-    search_vendor: "Поиск участника..."
+    search_vendor: "Поиск участника...",
+    scan_dual_stamp_title: "Двойная печать получена",
+    scan_dual_stamp_desc:
+      "{vendor} засчитывается в оба активных паспорта, поэтому вы только что получили одну фестивальную печать и одну печать Ale Trail.",
+    scan_single_stamp_title: "Печать получена",
+    scan_single_stamp_desc: "{vendor} добавлен в ваш активный паспорт.",
+    scan_no_stamp_title: "Лимит печатей достигнут",
+    scan_no_stamp_desc: "{vendor} уже дал вам максимально допустимые печати на сейчас.",
+    ale_trail_two_stamp_rule: "Каждая точка Ale Trail может дать до 2 печатей. Наберите 6 печатей всего, чтобы завершить паспорт."
   }
 };

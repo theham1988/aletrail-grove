@@ -202,7 +202,23 @@ export default function App() {
         return;
       }
 
-      window.alert(`Stamped ${result.vendor.name} in ${result.vendor.activePassports.join(", ")}`);
+      if (!result.addedNewStamp) {
+        window.alert(
+          `${t("scan_no_stamp_title")}\n\n${t("scan_no_stamp_desc").replace("{vendor}", result.vendor.name)}`,
+        );
+        return;
+      }
+
+      if ((result.addedPassportKeys || []).length > 1) {
+        window.alert(
+          `${t("scan_dual_stamp_title")}\n\n${t("scan_dual_stamp_desc").replace("{vendor}", result.vendor.name)}`,
+        );
+        return;
+      }
+
+      window.alert(
+        `${t("scan_single_stamp_title")}\n\n${t("scan_single_stamp_desc").replace("{vendor}", result.vendor.name)}`,
+      );
     }
   };
 

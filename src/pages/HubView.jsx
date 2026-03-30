@@ -28,13 +28,26 @@ export default function HubView({ onSelectPassport, stampsCount, festivalMeta, g
       <div className="hub-passport-card carnival-scope pressable" onClick={() => onSelectPassport("road_in_grove")}>
         <div className="hub-passport-badge hub-passport-badge-primary">{t("festival_passport")}</div>
         <h3 className="hub-passport-title">{t("hub_card_festival_title")}</h3>
+        <div className="hub-passport-meta">
+          <div className="hub-passport-schedule">{t("hub_card_festival_dates")}</div>
+          <div className="hub-double-stamp-badge">{t("hub_double_stamp_badge")}</div>
+        </div>
         <p className="hub-passport-copy">{t("hub_card_festival_desc")}</p>
       </div>
 
       <div className="hub-passport-card pressable" onClick={() => onSelectPassport("ale_trail_v1")}>
         <div className="hub-passport-badge hub-passport-badge-secondary">{t("ale_trail_passport")}</div>
         <h3 className="hub-passport-title">{t("hub_card_trail_title")}</h3>
+        <div className="hub-passport-meta">
+          <div className="hub-passport-schedule">{t("hub_card_trail_dates")}</div>
+          <div className="hub-double-stamp-badge">{t("hub_double_stamp_badge")}</div>
+        </div>
         <p className="hub-passport-copy">{t("hub_card_trail_desc")}</p>
+      </div>
+
+      <div className="hub-shared-passport-note">
+        <strong>{t("hub_shared_bonus_title")}</strong>
+        <p>{t("hub_shared_bonus_desc")}</p>
       </div>
     </section>
   );

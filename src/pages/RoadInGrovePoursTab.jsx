@@ -22,6 +22,7 @@ export default function RoadInGrovePoursTab({ syncing, onScan }) {
       </div>
 
       <VendorList vendors={vendors} onVendorSelect={setSelectedVendor} />
+
       <div className="scan-fab-wrap">
         <button type="button" className="scan-fab carnival pressable" onClick={onScan} disabled={syncing}>
           <span className="icon-label">
@@ -30,6 +31,7 @@ export default function RoadInGrovePoursTab({ syncing, onScan }) {
           </span>
         </button>
       </div>
+
       <FestivalVendorSheet vendor={selectedVendor} onClose={() => setSelectedVendor(null)} />
     </section>
   );

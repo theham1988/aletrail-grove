@@ -2,14 +2,23 @@ import { useMemo, useState } from "react";
 import { ChevronRight, QrCode } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import VendorDetailsDrawer from "../components/VendorDetailsDrawer";
-import { aleTrailVendors } from "../data/aleTrailVendors";
+import {
+  ALE_TRAIL_MAX_STAMPS_PER_STOP,
+  ALE_TRAIL_TOTAL_STAMPS,
+  aleTrailVendors,
+} from "../data/aleTrailVendors";
 
 export default function AleTrailExperienceView({ stamps, syncing, onScan, onBack }) {
   const { t } = useLanguage();
   const [selectedVendor, setSelectedVendor] = useState(null);
 
   const count = stamps.length;
-  const slots = useMemo(() => Array.from({ length: 6 }, (_, index) => index + 1), []);
+  const slots = useMemo(() => Array.from({ length: ALE_TRAIL_TOTAL_STAMPS }, (_, index) => index + 1), []);
+  const stampsByStop = useMemo(() => {
+    return Object.fromEntries(
+      aleTrailVendors.map((vendor) => [vendor.key, stamps.filter((stamp) => stamp === vendor.key).length]),
+    );
+  }, [stamps]);
 
   return (
     <section>
@@ -102,21 +111,26 @@ export default function AleTrailExperienceView({ stamps, syncing, onScan, onBack
               BIG BUDDHA
             </text>
           </g>
-          <polyline points="32,35 56,68 68,72 55,95 60,126 52,132" fill="none" stroke="#3A6B48" strokeWidth="1.5" strokeDasharray="3,3" />
         </svg>
 
         {aleTrailVendors.map((vendor) => {
           const yPercent = (vendor.y / 150) * 100;
+          const stopStampCount = stampsByStop[vendor.key] || 0;
           return (
             <button
               key={vendor.id}
               type="button"
-              className="map-pin"
+              className={`map-pin ${stopStampCount ? "collected" : ""}`}
               style={{ left: `${vendor.x}%`, top: `${yPercent}%` }}
               onClick={() => setSelectedVendor(vendor)}
             >
               <div className="pin-dot"></div>
-              <div className="pin-label">{vendor.name.split(" ")[0]}</div>
+              <div className="pin-label">
+                {vendor.shortLabel || vendor.name.split(" ")[0]}
+                <small>
+                  {stopStampCount}/{ALE_TRAIL_MAX_STAMPS_PER_STOP}
+                </small>
+              </div>
             </button>
           );
         })}
@@ -128,6 +142,9 @@ export default function AleTrailExperienceView({ stamps, syncing, onScan, onBack
           <article key={vendor.id} className="vendor-stop" onClick={() => setSelectedVendor(vendor)}>
             <h4 className="vendor-name">{vendor.name}</h4>
             <span className="vendor-area">{vendor.area}</span>
+            <span className="vendor-stop-progress">
+              {stampsByStop[vendor.key] || 0}/{ALE_TRAIL_MAX_STAMPS_PER_STOP}
+            </span>
             <ChevronRight className="vendor-chevron" size={20} />
           </article>
         ))}
@@ -137,12 +154,13 @@ export default function AleTrailExperienceView({ stamps, syncing, onScan, onBack
         <div className="passport-header">
           <span className="label">{t("vip_pass")}</span>
           <span className="label count-label">
-            {count} / 6 <span>{t("collected")}</span>
+            {count} / {ALE_TRAIL_TOTAL_STAMPS} <span>{t("collected")}</span>
           </span>
         </div>
+        <p className="ale-trail-passport-note">{t("ale_trail_two_stamp_rule")}</p>
         <div className="grid">
           {slots.map((slotId) => {
-            const active = stamps.includes(slotId);
+            const active = slotId <= count;
             return (
               <div key={slotId} className={`slot ${active ? "active" : ""}`}>
                 {slotId}
