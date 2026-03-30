@@ -8,6 +8,7 @@ import vendors from "../data/vendors.json";
 export default function RoadInGrovePoursTab({ syncing, onScan }) {
   const { t } = useLanguage();
   const [selectedVendor, setSelectedVendor] = useState(null);
+  const festivalVendors = vendors.filter((vendor) => vendor.activePassports.includes("road_in_grove"));
 
   return (
     <section className="carnival-scope pb-24">
@@ -21,7 +22,7 @@ export default function RoadInGrovePoursTab({ syncing, onScan }) {
         <p>{t("rig_desc")}</p>
       </div>
 
-      <VendorList vendors={vendors} onVendorSelect={setSelectedVendor} />
+      <VendorList vendors={festivalVendors} onVendorSelect={setSelectedVendor} />
 
       <div className="scan-fab-wrap">
         <button type="button" className="scan-fab carnival pressable" onClick={onScan} disabled={syncing}>

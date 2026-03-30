@@ -1,15 +1,17 @@
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { deleteDoc, doc } from "firebase/firestore";
 import { Beer, QrCode, House } from "lucide-react";
 import BottomNav from "./components/BottomNav";
+import QrScanModal from "./components/QrScanModal";
 import { useLanguage } from "./contexts/LanguageContext";
 import { usePassportManager } from "./hooks/usePassportManager";
 import { db } from "./lib/firebase";
 
 const LOCAL_USER_KEY = "rig_demo_user_id";
 const LIFF_PROFILE_CACHE_KEY = "rig_liff_profile_cache";
+const LIFF_LOGIN_INTENT_KEY = "rig_liff_login_intent";
 const APP_CACHE_VERSION_KEY = "rig_app_cache_version";
-const APP_CACHE_VERSION = "2026-03-27-auth-cache-v3";
+const APP_CACHE_VERSION = "2026-03-27-auth-cache-v4";
 const LIFF_ID = "2009417360-sriLePd1";
 
 const AleTrailExperienceView = lazy(() => import("./pages/AleTrailExperienceView"));
@@ -40,19 +42,44 @@ function clearSessionCache() {
   try {
     localStorage.removeItem(LIFF_PROFILE_CACHE_KEY);
     localStorage.removeItem(LOCAL_USER_KEY);
+    sessionStorage.removeItem(LIFF_LOGIN_INTENT_KEY);
   } catch {
     // Ignore localStorage failures so logout still proceeds.
   }
 }
 
+function readLoginIntent() {
+  try {
+    return sessionStorage.getItem(LIFF_LOGIN_INTENT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeLoginIntent(value) {
+  try {
+    if (value) {
+      sessionStorage.setItem(LIFF_LOGIN_INTENT_KEY, "1");
+    } else {
+      sessionStorage.removeItem(LIFF_LOGIN_INTENT_KEY);
+    }
+  } catch {
+    // Ignore storage failures and continue the auth flow.
+  }
+}
+
 export default function App() {
   const { t } = useLanguage();
+  const isEmbeddedPreview = window.self !== window.top;
   const [initialUserId, setInitialUserId] = useState("");
   const [authProfile, setAuthProfile] = useState({ displayName: "Explorer", pictureUrl: "" });
   const [authReady, setAuthReady] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [isLineClient, setIsLineClient] = useState(false);
+  const [authActionPending, setAuthActionPending] = useState(false);
   const [activeTab, setActiveTab] = useState("hub");
   const [selectedPassport, setSelectedPassport] = useState(null);
+  const [qrScanModalOpen, setQrScanModalOpen] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [introMounted, setIntroMounted] = useState(true);
   const [introVideoReady, setIntroVideoReady] = useState(false);
@@ -76,10 +103,11 @@ export default function App() {
 
     async function initLiffUser() {
       const cachedProfile = readCachedLiffProfile();
+      const loginIntent = readLoginIntent();
 
       try {
         // Keep local fallback only for embedded browser testing environments.
-        if (window.self !== window.top) {
+        if (isEmbeddedPreview) {
           const existing = localStorage.getItem(LOCAL_USER_KEY);
           const mockProfile = {
             displayName: "Local Explorer",
@@ -93,19 +121,18 @@ export default function App() {
             if (alive) setInitialUserId(generated);
           }
           if (alive) setAuthProfile(mockProfile);
+          if (alive) {
+            setAuthError("");
+            setAuthActionPending(false);
+          }
           return;
         }
 
         const liff = await getLiff();
         window.liff = liff;
         await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
-        if (liff.isInClient()) {
-          if (alive) {
-            setShowIntro(false);
-            setIntroMounted(false);
-            setIntroVideoReady(false);
-          }
-        }
+        const inClient = liff.isInClient();
+        if (alive) setIsLineClient(inClient);
         if (liff.isLoggedIn()) {
           const decodedToken = liff.getDecodedIDToken();
           const context = liff.getContext();
@@ -143,10 +170,21 @@ export default function App() {
             setInitialUserId(nextUserId);
             setAuthProfile(nextProfile);
             setAuthError("");
+            setAuthActionPending(false);
+          }
+
+          if (loginIntent && alive) {
+            writeLoginIntent(false);
+            setShowIntro(false);
+            setIntroMounted(false);
+            setIntroVideoReady(false);
           }
         } else {
-          liff.login();
-          return;
+          writeLoginIntent(false);
+          if (alive) {
+            setAuthError("");
+            setAuthActionPending(false);
+          }
         }
       } catch (error) {
         if (cachedProfile?.userId && alive) {
@@ -156,8 +194,10 @@ export default function App() {
             pictureUrl: cachedProfile.pictureUrl || "",
           });
           setAuthError("");
+          setAuthActionPending(false);
         } else if (alive) {
           setAuthError(error?.message || "Failed to initialize LINE login.");
+          setAuthActionPending(false);
         }
       } finally {
         if (alive) setAuthReady(true);
@@ -168,7 +208,7 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [isEmbeddedPreview]);
 
   const { loading, syncing, profile, passports, legacyStamps, festivalMeta, goldenBeerByDay, error, scanAndApplyVendor } =
     usePassportManager(initialUserId, authProfile);
@@ -228,9 +268,14 @@ export default function App() {
     handleLogout();
   };
 
-  const handleScan = async () => {
-    const result = await scanAndApplyVendor();
+  const handleScan = useCallback(async (providedPayload = "") => {
+    const result = await scanAndApplyVendor(providedPayload);
     if (!result || result.cancelled) {
+      return;
+    }
+
+    if (result.requiresBrowserFallback) {
+      setQrScanModalOpen(true);
       return;
     }
 
@@ -263,14 +308,16 @@ export default function App() {
         `${t("scan_single_stamp_title")}\n\n${t("scan_single_stamp_desc").replace("{vendor}", result.vendor.name)}`,
       );
     }
-  };
+  }, [scanAndApplyVendor, t]);
+
+  const shouldPlayIntroVideo = !isLineClient;
 
   useEffect(() => {
-    if (authReady && !loading && showIntro) {
-      setIntroVideoReady(false);
+    if (showIntro) {
       setIntroMounted(true);
+      setIntroVideoReady(!shouldPlayIntroVideo);
     }
-  }, [authReady, loading, showIntro]);
+  }, [showIntro, shouldPlayIntroVideo]);
 
   useEffect(() => {
     return () => {
@@ -287,6 +334,35 @@ export default function App() {
       return;
     }
     setActiveTab("passport");
+  };
+
+  const handleEnterGrove = async () => {
+    if (authActionPending || (!authReady && !isEmbeddedPreview)) return;
+
+    if (isEmbeddedPreview || initialUserId) {
+      handleIntroDismiss();
+      return;
+    }
+
+    try {
+      setAuthError("");
+      setAuthActionPending(true);
+      const liff = await getLiff();
+      window.liff = liff;
+
+      if (liff.isLoggedIn()) {
+        setAuthActionPending(false);
+        handleIntroDismiss();
+        return;
+      }
+
+      writeLoginIntent(true);
+      liff.login();
+    } catch (error) {
+      writeLoginIntent(false);
+      setAuthActionPending(false);
+      setAuthError(error?.message || "Unable to start LINE login.");
+    }
   };
 
   const handleIntroDismiss = () => {
@@ -395,6 +471,11 @@ export default function App() {
     setActiveTab(nextTab);
   };
 
+  const handleQrScanDetected = useCallback(async (payload) => {
+    setQrScanModalOpen(false);
+    await handleScan(payload);
+  }, [handleScan]);
+
   return (
     <div className="app-container" style={{ backgroundColor: showIntro ? "#000" : undefined }}>
       {(!authReady || loading) && !introMounted && (
@@ -408,7 +489,7 @@ export default function App() {
 
       {authReady && !loading && (
         <>
-          {authError && <p style={{ margin: "16px", color: "#b91c1c", fontSize: "13px", fontWeight: 700 }}>{authError}</p>}
+          {!introMounted && authError && <p style={{ margin: "16px", color: "#b91c1c", fontSize: "13px", fontWeight: 700 }}>{authError}</p>}
           {error && <p style={{ margin: "16px", color: "#b91c1c", fontSize: "13px", fontWeight: 700 }}>{error}</p>}
 
           <main className="content-area">
@@ -446,31 +527,33 @@ export default function App() {
                 paddingBottom: "60px",
               }}
             >
-              <video
-                className="intro-video"
-                src="/intro.mp4"
-                autoPlay
-                muted
-                playsInline
-                onLoadedData={() => setIntroVideoReady(true)}
-                onError={() => setIntroVideoReady(true)}
-                onEnded={handleIntroDismiss}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  zIndex: -1,
-                  opacity: introVideoReady ? 1 : 0,
-                  transition: "opacity 0.2s ease-in-out",
-                }}
-              />
+              {shouldPlayIntroVideo && (
+                <video
+                  className="intro-video"
+                  src="/intro.mp4"
+                  autoPlay
+                  muted
+                  playsInline
+                  onLoadedData={() => setIntroVideoReady(true)}
+                  onError={() => setIntroVideoReady(true)}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    zIndex: -1,
+                    opacity: introVideoReady ? 1 : 0,
+                    transition: "opacity 0.2s ease-in-out",
+                  }}
+                />
+              )}
               <button
                 type="button"
                 className="pressable"
-                onClick={handleIntroDismiss}
+                onClick={handleEnterGrove}
+                disabled={authActionPending || (!authReady && !isEmbeddedPreview)}
                 style={{
                   backgroundColor: "var(--carnival-gold)",
                   color: "var(--carnival-red)",
@@ -487,12 +570,33 @@ export default function App() {
                   transition: "opacity 0.2s ease-in-out",
                 }}
               >
-                Enter Grove
+                {authActionPending || (!authReady && !isEmbeddedPreview) ? t("syncing") : t("enter_grove")}
               </button>
+              <p
+                style={{
+                  marginTop: "16px",
+                  maxWidth: "280px",
+                  textAlign: "center",
+                  color: authError ? "#f5c24d" : "#fdf8e7",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  lineHeight: 1.4,
+                  zIndex: 10000,
+                  opacity: introVideoReady ? 1 : 0,
+                  transition: "opacity 0.2s ease-in-out",
+                }}
+              >
+                {authError || (initialUserId ? t("passport_hub_hint") : t("join_note"))}
+              </p>
             </div>
           )}
         </>
       )}
+      <QrScanModal
+        open={qrScanModalOpen}
+        onClose={() => setQrScanModalOpen(false)}
+        onDetected={handleQrScanDetected}
+      />
     </div>
   );
 }

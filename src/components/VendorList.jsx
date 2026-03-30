@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 
 const DEFAULT_STYLE_PILLS = ["All", "IPA", "Stout", "Sour", "Cider"];
 
-export default function VendorList({ vendors, onVendorSelect }) {
+export default function VendorList({ vendors, onVendorSelect, showPassportInfo = false }) {
   const [query, setQuery] = useState("");
   const [activeStyle, setActiveStyle] = useState("All");
 
@@ -87,9 +87,11 @@ export default function VendorList({ vendors, onVendorSelect }) {
                 Booth: {vendor.booth || "TBA"}
               </p>
             </div>
-            <p className="mt-2 text-xs font-semibold text-forest-muted">
-              Passports: {vendor.activePassports.join(", ")}
-            </p>
+            {showPassportInfo && (
+              <p className="mt-2 text-xs font-semibold text-forest-muted">
+                Passports: {vendor.activePassports.join(", ")}
+              </p>
+            )}
             <div className="mt-3 flex flex-wrap gap-2">
               {(vendor.beers || []).slice(0, 3).map((beer) => (
                 <span

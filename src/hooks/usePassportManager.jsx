@@ -32,6 +32,7 @@ const DEFAULT_FESTIVAL_META = {
 };
 
 const SCAN_CANCELLED = "scan_cancelled";
+const SCAN_UNSUPPORTED = "scan_unsupported";
 
 const ALE_TRAIL_VALID_KEYS = new Set(aleTrailVendors.map((vendor) => vendor.key));
 
@@ -119,7 +120,7 @@ function resolveVendorFromScan(rawValue) {
 async function scanQRCode() {
   const importedLiff = await import("@line/liff").then((module) => module.default).catch(() => null);
   const liff = window.liff || importedLiff;
-  const useNativeScanner = Boolean(liff?.scanCodeV2 && typeof liff?.isInClient === "function" && liff.isInClient());
+  const useNativeScanner = Boolean(liff?.scanCodeV2);
 
   if (useNativeScanner) {
     try {
@@ -131,12 +132,19 @@ async function scanQRCode() {
       if (message.includes("cancel") || message.includes("close") || message.includes("abort")) {
         return SCAN_CANCELLED;
       }
+      if (
+        message.includes("subwindow") ||
+        message.includes("not supported") ||
+        message.includes("unsupported") ||
+        message.includes("not available")
+      ) {
+        return SCAN_UNSUPPORTED;
+      }
       throw error;
     }
   }
 
-  const manualValue = window.prompt("Enter QR payload (vendor id or exact vendor name):");
-  return manualValue?.toString().trim() || SCAN_CANCELLED;
+  return SCAN_UNSUPPORTED;
 }
 
 function mergeGoldenBeerByDay(partial) {
@@ -279,13 +287,21 @@ export function usePassportManager(userId, authProfile) {
     [authProfile?.displayName, db, festivalRuntimeRef, goldenBeerByDay, profile.displayName, userId],
   );
 
-  const scanAndApplyVendor = useCallback(async () => {
+  const scanAndApplyVendor = useCallback(async (providedPayload = "") => {
     if (!userRef) return null;
     setSyncing(true);
     setError("");
 
     try {
-      const payload = await scanQRCode();
+      const payload =
+        typeof providedPayload === "string" && providedPayload.trim()
+          ? providedPayload.trim()
+          : await scanQRCode();
+
+      if (payload === SCAN_UNSUPPORTED) {
+        setError("");
+        return { requiresBrowserFallback: true };
+      }
       if (payload === SCAN_CANCELLED) {
         setError("");
         return { cancelled: true };

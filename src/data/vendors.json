@@ -2,7 +2,7 @@
   {
     "id": 1,
     "name": "Triple Pearl",
-    "booth": "B41",
+    "booth": "B40",
     "activePassports": ["road_in_grove"],
     "beers": [
       { "name": "Andaman Haze", "style": "IPA", "abv": "6.2%" },
@@ -13,7 +13,7 @@
   {
     "id": 2,
     "name": "Wizard",
-    "booth": "B42",
+    "booth": "B41",
     "activePassports": ["road_in_grove"],
     "beers": [
       { "name": "Spellbound IPA", "style": "IPA", "abv": "6.8%" },
@@ -24,7 +24,7 @@
   {
     "id": 3,
     "name": "Chitbeer",
-    "booth": "B22",
+    "booth": "",
     "activePassports": ["road_in_grove"],
     "beers": [
       { "name": "Bangkok Pale", "style": "Pale Ale", "abv": "5.5%" },
@@ -35,7 +35,7 @@
   {
     "id": 4,
     "name": "Chit Hole",
-    "booth": "",
+    "booth": "B22",
     "activePassports": ["road_in_grove", "ale_trail_v1"],
     "beers": [
       { "name": "Rawai Dry Stout", "style": "Stout", "abv": "5.9%" },
@@ -54,46 +54,88 @@
       { "name": "Lychee Bloom", "style": "Cider", "abv": "4.5%" }
     ]
   },
-  { "id": 6, "name": "Brewbridge", "booth": "B32", "activePassports": ["road_in_grove", "ale_trail_v1"], "beers": [] },
-  { "id": 7, "name": "Beerfest", "booth": "B12", "activePassports": ["road_in_grove", "ale_trail_v1"], "beers": [] },
+  {
+    "id": 6,
+    "name": "Brewbridge",
+    "booth": "B32",
+    "activePassports": ["road_in_grove", "ale_trail_v1"],
+    "beers": [
+      { "name": "Dibuk Gold", "style": "DoubleIPA", "abv": "7.5%" },
+      { "name": "Cobali", "style": "Rose", "abv": "3.8%" },
+      { "name": "Sulfur", "style": "Pilsner", "abv": "5.0%" }
+    ]
+  },
+  { "id": 7, "name": "Beerfest", "booth": "B13", "activePassports": ["road_in_grove", "ale_trail_v1"], "beers": [] },
   { "id": 8, "name": "Cozy Wine", "booth": "", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 9, "name": "Steel & Bone", "booth": "B38", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 10, "name": "Dibuk", "booth": "", "activePassports": ["road_in_grove"], "beers": [] },
+  {
+    "id": 9,
+    "name": "Steel & Bone",
+    "booth": "B38",
+    "activePassports": ["road_in_grove"],
+    "beers": [
+      { "name": "Boho", "style": "Pilsner", "abv": "5.3%" },
+      { "name": "Sajai Bright", "style": "IPA", "abv": "6.6%" },
+      { "name": "Hazy Lazy Crazy", "style": "IPA", "abv": "6.4%" },
+      { "name": "West Andaman Coast", "style": "IPA", "abv": "7.1%" },
+      { "name": "Loral", "style": "Lager", "abv": "5.1%" },
+      { "name": "Wild Orange", "style": "Saison", "abv": "4.6%" }
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Dibuk",
+    "booth": "B32",
+    "activePassports": ["road_in_grove"],
+    "beers": [
+      { "name": "Dibuk", "style": "IPA", "abv": "6.0%" },
+      { "name": "Uranium", "style": "New England Double IPA", "abv": "7.2%" }
+    ]
+  },
   { "id": 11, "name": "GoDrunkLab", "booth": "B3", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 12, "name": "AunderWild", "booth": "B3", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 13, "name": "Wiset Beer", "booth": "B23", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 14, "name": "Spirit of Songkla", "booth": "B2", "activePassports": ["road_in_grove"], "beers": [] },
+  { "id": 13, "name": "Wiset Beer", "booth": "B32", "activePassports": ["road_in_grove"], "beers": [] },
+  { "id": 14, "name": "Spirit of Songkla", "booth": "B22", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 15, "name": "Jibbeer", "booth": "B20", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 16, "name": "MAD Beer", "booth": "B31", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 17, "name": "Umbrewla group", "booth": "B37", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 18, "name": "Rama II", "booth": "B29", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 19, "name": "Hopzone", "booth": "B44", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 20, "name": "Small town", "booth": "", "activePassports": ["road_in_grove"], "beers": [] },
+  { "id": 20, "name": "Small town", "booth": "B34", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 21, "name": "Kaab House", "booth": "", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 22, "name": "Khoy Brewing", "booth": "B26", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 23, "name": "Haru Craft", "booth": "B18", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 24, "name": "Satun Bier", "booth": "B6", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 25, "name": "Buraza house", "booth": "B16", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 26, "name": "Moonray", "booth": "B33", "activePassports": ["road_in_grove"], "beers": [] },
+  { "id": 25, "name": "Buraza house", "booth": "", "activePassports": ["road_in_grove"], "beers": [] },
+  {
+    "id": 26,
+    "name": "Moonray",
+    "booth": "B33",
+    "activePassports": ["road_in_grove"],
+    "beers": [
+      { "name": "Sailing For Andaman", "style": "Lager", "abv": "5.0%" },
+      { "name": "Longing For Tropical", "style": "Lager", "abv": "5.0%" },
+      { "name": "Moon Gravity", "style": "HazyIPA", "abv": "6.3%" }
+    ]
+  },
   { "id": 27, "name": "Alone Craft", "booth": "B9", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 28, "name": "Samarn Craft", "booth": "B21", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 29, "name": "บรรเจิดเบียร์", "booth": "B24", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 30, "name": "Mongkol Brewing", "booth": "B7", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 31, "name": "MR.SATO", "booth": "B39", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 32, "name": "SRIRACHA Brew", "booth": "B40", "activePassports": ["road_in_grove"], "beers": [] },
+  { "id": 31, "name": "MR.SATO", "booth": "B11", "activePassports": ["road_in_grove"], "beers": [] },
+  { "id": 32, "name": "SRIRACHA Brew", "booth": "B39", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 33, "name": "HAPPYBIRTHDAY BREWING", "booth": "B1", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 34, "name": "สีสวาด", "booth": "B15", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 35, "name": "APIROAM", "booth": "B43", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 36, "name": "KHAO KHO CRAFT", "booth": "B25", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 37, "name": "The Brewing Corner", "booth": "B4", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 38, "name": "Craft on the moon", "booth": "B30", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 39, "name": "Country land", "booth": "B13", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 40, "name": "Lanta brewery", "booth": "B11", "activePassports": ["road_in_grove"], "beers": [] },
+  { "id": 39, "name": "Country land", "booth": "B", "activePassports": ["road_in_grove"], "beers": [] },
+  { "id": 40, "name": "Lanta brewery", "booth": "B12", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 41, "name": "Mighty Ale", "booth": "B8", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 42, "name": "Chiang Rai Hops Yard", "booth": "B5", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 43, "name": "underdog+ bavarian craft", "booth": "B36", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 44, "name": "CHACHOENGSAO FARM", "booth": "B24", "activePassports": ["road_in_grove"], "beers": [] },
-  { "id": 45, "name": "HJB", "booth": "", "activePassports": ["road_in_grove"], "beers": [] },
+  { "id": 45, "name": "HJB", "booth": "B27", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 46, "name": "Azytone", "booth": "B27", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 47, "name": "Jo+ Beer", "booth": "B25", "activePassports": ["road_in_grove"], "beers": [] },
   { "id": 48, "name": "Chalong Bay Rum", "booth": "B14", "activePassports": ["road_in_grove", "ale_trail_v1"], "beers": [] },

@@ -162,6 +162,141 @@ p {
   backdrop-filter: blur(8px);
 }
 
+.qr-scan-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(18, 38, 23, 0.78);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 20px 16px 96px;
+}
+
+.qr-scan-modal {
+  width: 100%;
+  max-width: 360px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  padding: 20px;
+  position: relative;
+}
+
+.qr-scan-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.qr-scan-copy {
+  padding-right: 36px;
+}
+
+.qr-scan-copy h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: var(--text-main);
+}
+
+.qr-scan-copy p {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.qr-scan-stage {
+  margin-top: 16px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #0f1114;
+  min-height: 280px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.qr-scan-region {
+  width: 100%;
+  min-height: 280px;
+}
+
+.qr-scan-region video {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  display: block;
+}
+
+.qr-scan-status {
+  min-height: 20px;
+  margin-top: 12px !important;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.qr-scan-help-panel {
+  margin-top: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(33, 67, 42, 0.14);
+  background: rgba(245, 244, 239, 0.95);
+  padding: 12px 14px;
+}
+
+.qr-scan-help-panel strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.qr-scan-help-panel p {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5 !important;
+}
+
+.qr-scan-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.qr-scan-action {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+}
+
+.qr-scan-file-input {
+  display: none;
+}
+
+.qr-scan-cancel {
+  width: 100%;
+  margin-top: 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
