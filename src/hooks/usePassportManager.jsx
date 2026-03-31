@@ -19,6 +19,7 @@ import {
   getFestivalEventStatus,
 } from "../data/festivalConfig";
 import { db } from "../lib/firebase";
+import { isLikelyLineInAppBrowser } from "../lib/liffEnv";
 
 const DEFAULT_PASSPORTS = {
   road_in_grove: [],
@@ -32,9 +33,23 @@ const DEFAULT_FESTIVAL_META = {
 };
 
 const SCAN_CANCELLED = "scan_cancelled";
+const SCAN_LINE_UNAVAILABLE = "scan_line_unavailable";
 const SCAN_UNSUPPORTED = "scan_unsupported";
 
 const ALE_TRAIL_VALID_KEYS = new Set(aleTrailVendors.map((vendor) => vendor.key));
+
+function isUnsupportedLineScannerError(message) {
+  return (
+    message.includes("subwindow") ||
+    message.includes("subwinow") ||
+    message.includes("not supported") ||
+    message.includes("unsupported") ||
+    message.includes("not available") ||
+    message.includes("unavailable") ||
+    message.includes("cannot open") ||
+    message.includes("can't open")
+  );
+}
 
 function normalizeRoadInGroveStamps(raw) {
   if (!Array.isArray(raw)) return [];
@@ -120,7 +135,13 @@ function resolveVendorFromScan(rawValue) {
 async function scanQRCode() {
   const importedLiff = await import("@line/liff").then((module) => module.default).catch(() => null);
   const liff = window.liff || importedLiff;
-  const useNativeScanner = Boolean(liff?.scanCodeV2);
+  const inClient = Boolean(liff?.isInClient?.());
+  const lineEmbedded = inClient || isLikelyLineInAppBrowser();
+  const useNativeScanner = Boolean(liff?.scanCodeV2) && lineEmbedded;
+
+  if (!lineEmbedded) {
+    return SCAN_UNSUPPORTED;
+  }
 
   if (useNativeScanner) {
     try {
@@ -132,19 +153,14 @@ async function scanQRCode() {
       if (message.includes("cancel") || message.includes("close") || message.includes("abort")) {
         return SCAN_CANCELLED;
       }
-      if (
-        message.includes("subwindow") ||
-        message.includes("not supported") ||
-        message.includes("unsupported") ||
-        message.includes("not available")
-      ) {
-        return SCAN_UNSUPPORTED;
+      if (isUnsupportedLineScannerError(message)) {
+        return SCAN_LINE_UNAVAILABLE;
       }
       throw error;
     }
   }
 
-  return SCAN_UNSUPPORTED;
+  return SCAN_LINE_UNAVAILABLE;
 }
 
 function mergeGoldenBeerByDay(partial) {
@@ -298,6 +314,10 @@ export function usePassportManager(userId, authProfile) {
           ? providedPayload.trim()
           : await scanQRCode();
 
+      if (payload === SCAN_LINE_UNAVAILABLE) {
+        setError("");
+        return { lineScannerUnavailable: true };
+      }
       if (payload === SCAN_UNSUPPORTED) {
         setError("");
         return { requiresBrowserFallback: true };

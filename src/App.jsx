@@ -6,12 +6,13 @@ import QrScanModal from "./components/QrScanModal";
 import { useLanguage } from "./contexts/LanguageContext";
 import { usePassportManager } from "./hooks/usePassportManager";
 import { db } from "./lib/firebase";
+import { isLikelyLineInAppBrowser } from "./lib/liffEnv";
 
 const LOCAL_USER_KEY = "rig_demo_user_id";
 const LIFF_PROFILE_CACHE_KEY = "rig_liff_profile_cache";
 const LIFF_LOGIN_INTENT_KEY = "rig_liff_login_intent";
 const APP_CACHE_VERSION_KEY = "rig_app_cache_version";
-const APP_CACHE_VERSION = "2026-03-27-auth-cache-v4";
+const APP_CACHE_VERSION = "2026-03-31-line-scan-ua-v1";
 const LIFF_ID = "2009417360-sriLePd1";
 
 const AleTrailExperienceView = lazy(() => import("./pages/AleTrailExperienceView"));
@@ -132,7 +133,8 @@ export default function App() {
         window.liff = liff;
         await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
         const inClient = liff.isInClient();
-        if (alive) setIsLineClient(inClient);
+        const lineEmbedded = inClient || isLikelyLineInAppBrowser();
+        if (alive) setIsLineClient(lineEmbedded);
         if (liff.isLoggedIn()) {
           const decodedToken = liff.getDecodedIDToken();
           const context = liff.getContext();
@@ -274,7 +276,16 @@ export default function App() {
       return;
     }
 
+    if (result.lineScannerUnavailable) {
+      window.alert(t("scan_line_unavailable"));
+      return;
+    }
+
     if (result.requiresBrowserFallback) {
+      if (isLineClient || isLikelyLineInAppBrowser()) {
+        window.alert(t("scan_line_unavailable"));
+        return;
+      }
       setQrScanModalOpen(true);
       return;
     }
@@ -308,7 +319,7 @@ export default function App() {
         `${t("scan_single_stamp_title")}\n\n${t("scan_single_stamp_desc").replace("{vendor}", result.vendor.name)}`,
       );
     }
-  }, [scanAndApplyVendor, t]);
+  }, [isLineClient, scanAndApplyVendor, t]);
 
   const shouldPlayIntroVideo = !isLineClient;
 

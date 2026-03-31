@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Camera, ImagePlus, X } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 
@@ -146,18 +146,14 @@ export default function QrScanModal({ open, onClose, onDetected }) {
       setStatus("");
       setBusy(false);
       setCameraIssue("");
-      return;
+      setCameraActive(false);
     }
+  }, [open, stopScanner]);
 
-    setBusy(false);
-    setCameraActive(false);
-    setStatus(t("qr_fallback_camera_tap_to_start"));
-    setCameraIssue("");
-
-    return () => {
-      void stopScanner();
-    };
-  }, [open, stopScanner, t]);
+  useLayoutEffect(() => {
+    if (!open) return;
+    void startCamera();
+  }, [open, startCamera]);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
