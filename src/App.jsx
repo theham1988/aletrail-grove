@@ -12,8 +12,61 @@ const LOCAL_USER_KEY = "rig_demo_user_id";
 const LIFF_PROFILE_CACHE_KEY = "rig_liff_profile_cache";
 const LIFF_LOGIN_INTENT_KEY = "rig_liff_login_intent";
 const APP_CACHE_VERSION_KEY = "rig_app_cache_version";
-const APP_CACHE_VERSION = "2026-03-31-line-scan-ua-v1";
+const APP_CACHE_VERSION = "2026-03-31-enter-grove-init-retry-v1";
 const LIFF_ID = "2009417360-sriLePd1";
+
+async function initLiffSdk(liff, { maxAttempts = 3, baseDelayMs = 500 } = {}) {
+  let lastError;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
+      return;
+    } catch (e) {
+      lastError = e;
+      if (attempt < maxAttempts && isLikelyNetworkAuthError(e)) {
+        await new Promise((r) => setTimeout(r, baseDelayMs * attempt));
+        continue;
+      }
+      throw lastError;
+    }
+  }
+}
+
+async function syncLoggedInUserFromLiff(liff, cachedProfile) {
+  const decodedToken = liff.getDecodedIDToken();
+  const context = liff.getContext();
+  let nextUserId = context?.userId || decodedToken?.sub || cachedProfile?.userId || "";
+  let nextProfile = {
+    displayName: decodedToken?.name || cachedProfile?.displayName || "Festival Explorer",
+    pictureUrl: decodedToken?.picture || cachedProfile?.pictureUrl || "",
+  };
+
+  try {
+    const userProfile = await liff.getProfile();
+    nextUserId = userProfile.userId || nextUserId;
+    nextProfile = {
+      displayName: userProfile.displayName || nextProfile.displayName,
+      pictureUrl: userProfile.pictureUrl || nextProfile.pictureUrl,
+    };
+  } catch (profileError) {
+    console.warn("LINE profile fetch failed, using token/context fallback.", profileError);
+  }
+
+  if (!nextUserId) {
+    throw new Error("Unable to fetch LINE account details.");
+  }
+
+  localStorage.setItem(
+    LIFF_PROFILE_CACHE_KEY,
+    JSON.stringify({
+      userId: nextUserId,
+      displayName: nextProfile.displayName,
+      pictureUrl: nextProfile.pictureUrl,
+    }),
+  );
+
+  return { nextUserId, nextProfile };
+}
 
 const AleTrailExperienceView = lazy(() => import("./pages/AleTrailExperienceView"));
 const HubView = lazy(() => import("./pages/HubView"));
@@ -69,6 +122,16 @@ function writeLoginIntent(value) {
   }
 }
 
+function isLikelyNetworkAuthError(error) {
+  const msg = `${error?.message || ""} ${error?.cause?.message || ""}`.toLowerCase();
+  return (
+    msg.includes("failed to fetch") ||
+    msg.includes("networkerror") ||
+    msg.includes("network error") ||
+    msg.includes("load failed")
+  );
+}
+
 export default function App() {
   const { t } = useLanguage();
   const isEmbeddedPreview = window.self !== window.top;
@@ -76,6 +139,7 @@ export default function App() {
   const [authProfile, setAuthProfile] = useState({ displayName: "Explorer", pictureUrl: "" });
   const [authReady, setAuthReady] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [authConnectionRetry, setAuthConnectionRetry] = useState(false);
   const [isLineClient, setIsLineClient] = useState(false);
   const [authActionPending, setAuthActionPending] = useState(false);
   const [activeTab, setActiveTab] = useState("hub");
@@ -107,6 +171,8 @@ export default function App() {
       const loginIntent = readLoginIntent();
 
       try {
+        if (alive) setAuthConnectionRetry(false);
+
         // Keep local fallback only for embedded browser testing environments.
         if (isEmbeddedPreview) {
           const existing = localStorage.getItem(LOCAL_USER_KEY);
@@ -131,47 +197,18 @@ export default function App() {
 
         const liff = await getLiff();
         window.liff = liff;
-        await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
+        await initLiffSdk(liff);
         const inClient = liff.isInClient();
         const lineEmbedded = inClient || isLikelyLineInAppBrowser();
         if (alive) setIsLineClient(lineEmbedded);
         if (liff.isLoggedIn()) {
-          const decodedToken = liff.getDecodedIDToken();
-          const context = liff.getContext();
-          let nextUserId = context?.userId || decodedToken?.sub || cachedProfile?.userId || "";
-          let nextProfile = {
-            displayName: decodedToken?.name || cachedProfile?.displayName || "Festival Explorer",
-            pictureUrl: decodedToken?.picture || cachedProfile?.pictureUrl || "",
-          };
-
-          try {
-            const userProfile = await liff.getProfile();
-            nextUserId = userProfile.userId || nextUserId;
-            nextProfile = {
-              displayName: userProfile.displayName || nextProfile.displayName,
-              pictureUrl: userProfile.pictureUrl || nextProfile.pictureUrl,
-            };
-          } catch (profileError) {
-            console.warn("LINE profile fetch failed, using token/context fallback.", profileError);
-          }
-
-          if (!nextUserId) {
-            throw new Error("Unable to fetch LINE account details.");
-          }
-
-          localStorage.setItem(
-            LIFF_PROFILE_CACHE_KEY,
-            JSON.stringify({
-              userId: nextUserId,
-              displayName: nextProfile.displayName,
-              pictureUrl: nextProfile.pictureUrl,
-            }),
-          );
+          const { nextUserId, nextProfile } = await syncLoggedInUserFromLiff(liff, cachedProfile);
 
           if (alive) {
             setInitialUserId(nextUserId);
             setAuthProfile(nextProfile);
             setAuthError("");
+            setAuthConnectionRetry(false);
             setAuthActionPending(false);
           }
 
@@ -185,6 +222,7 @@ export default function App() {
           writeLoginIntent(false);
           if (alive) {
             setAuthError("");
+            setAuthConnectionRetry(false);
             setAuthActionPending(false);
           }
         }
@@ -196,9 +234,16 @@ export default function App() {
             pictureUrl: cachedProfile.pictureUrl || "",
           });
           setAuthError("");
+          setAuthConnectionRetry(false);
           setAuthActionPending(false);
         } else if (alive) {
-          setAuthError(error?.message || "Failed to initialize LINE login.");
+          if (isLikelyNetworkAuthError(error)) {
+            setAuthError(t("auth_connection_error"));
+            setAuthConnectionRetry(true);
+          } else {
+            setAuthError(error?.message || "Failed to initialize LINE login.");
+            setAuthConnectionRetry(false);
+          }
           setAuthActionPending(false);
         }
       } finally {
@@ -210,7 +255,7 @@ export default function App() {
     return () => {
       alive = false;
     };
-  }, [isEmbeddedPreview]);
+  }, [isEmbeddedPreview, t]);
 
   const { loading, syncing, profile, passports, legacyStamps, festivalMeta, goldenBeerByDay, error, scanAndApplyVendor } =
     usePassportManager(initialUserId, authProfile);
@@ -252,9 +297,13 @@ export default function App() {
   const handleLogout = async () => {
     clearSessionCache();
     try {
-      const liff = await getLiff();
-      if (window.self === window.top && liff.isLoggedIn()) {
-        liff.logout();
+      if (!isEmbeddedPreview) {
+        const liff = await getLiff();
+        window.liff = liff;
+        await initLiffSdk(liff);
+        if (liff.isLoggedIn()) {
+          liff.logout();
+        }
       }
     } catch {
       // Ignore logout failures and still refresh to a clean app state.
@@ -357,11 +406,20 @@ export default function App() {
 
     try {
       setAuthError("");
+      setAuthConnectionRetry(false);
       setAuthActionPending(true);
       const liff = await getLiff();
       window.liff = liff;
+      await initLiffSdk(liff);
+
+      const lineEmbedded = liff.isInClient() || isLikelyLineInAppBrowser();
+      setIsLineClient(lineEmbedded);
 
       if (liff.isLoggedIn()) {
+        const cached = readCachedLiffProfile();
+        const { nextUserId, nextProfile } = await syncLoggedInUserFromLiff(liff, cached);
+        setInitialUserId(nextUserId);
+        setAuthProfile(nextProfile);
         setAuthActionPending(false);
         handleIntroDismiss();
         return;
@@ -369,10 +427,17 @@ export default function App() {
 
       writeLoginIntent(true);
       liff.login();
+      setAuthActionPending(false);
     } catch (error) {
       writeLoginIntent(false);
       setAuthActionPending(false);
-      setAuthError(error?.message || "Unable to start LINE login.");
+      if (isLikelyNetworkAuthError(error)) {
+        setAuthError(t("auth_connection_error"));
+        setAuthConnectionRetry(true);
+      } else {
+        setAuthError(error?.message || "Unable to start LINE login.");
+        setAuthConnectionRetry(false);
+      }
     }
   };
 
@@ -500,7 +565,16 @@ export default function App() {
 
       {authReady && !loading && (
         <>
-          {!introMounted && authError && <p style={{ margin: "16px", color: "#b91c1c", fontSize: "13px", fontWeight: 700 }}>{authError}</p>}
+          {!introMounted && authError && (
+            <div style={{ margin: "16px", textAlign: "center" }}>
+              <p style={{ color: "#b91c1c", fontSize: "13px", fontWeight: 700, margin: "0 0 8px" }}>{authError}</p>
+              {authConnectionRetry && (
+                <button type="button" className="pressable" style={{ fontSize: "13px", fontWeight: 700 }} onClick={() => window.location.reload()}>
+                  {t("auth_retry_button")}
+                </button>
+              )}
+            </div>
+          )}
           {error && <p style={{ margin: "16px", color: "#b91c1c", fontSize: "13px", fontWeight: 700 }}>{error}</p>}
 
           <main className="content-area">
@@ -599,6 +673,28 @@ export default function App() {
               >
                 {authError || (initialUserId ? t("passport_hub_hint") : t("join_note"))}
               </p>
+              {authConnectionRetry && (
+                <button
+                  type="button"
+                  className="pressable"
+                  onClick={() => window.location.reload()}
+                  style={{
+                    marginTop: "12px",
+                    zIndex: 10000,
+                    opacity: introVideoReady ? 1 : 0,
+                    transition: "opacity 0.2s ease-in-out",
+                    padding: "10px 20px",
+                    borderRadius: "12px",
+                    fontSize: "13px",
+                    fontWeight: 800,
+                    backgroundColor: "rgba(253, 248, 231, 0.15)",
+                    color: "#fdf8e7",
+                    border: "1px solid rgba(253, 248, 231, 0.4)",
+                  }}
+                >
+                  {t("auth_retry_button")}
+                </button>
+              )}
             </div>
           )}
         </>

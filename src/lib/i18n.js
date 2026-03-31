@@ -20,6 +20,8 @@ export const i18n = {
     collected: "Collected",
     scan_btn: "Scan Venue QR",
     enter_grove: "Enter Grove",
+    auth_connection_error: "Could not reach LINE. Check your connection and try again.",
+    auth_retry_button: "Try again",
     qr_fallback_title: "Scan QR Code",
     qr_fallback_desc: "Use your camera or upload a QR image to continue.",
     qr_fallback_camera: "Use Camera",
@@ -37,7 +39,8 @@ export const i18n = {
     qr_fallback_camera_busy: "The camera is busy or could not start. Close other camera apps and try again.",
     qr_fallback_camera_unavailable: "Camera scanning is unavailable here. Try uploading a QR image instead.",
     qr_fallback_upload_error: "We couldn't read a QR code from that image. Try another photo.",
-    scan_line_unavailable: "The LINE scanner is unavailable right now. Please try scanning again from inside the LINE app.",
+    scan_line_unavailable:
+      "The in-app web page can't use your camera the same way LINE's own camera does. Tap Scan again to open LINE's QR scanner. If it still fails, update LINE or open this link in Chrome/Safari.",
     vip_unlocked: "VIP UNLOCKED",
     vip_desc:
       "Show this screen at the Grove Festival entrance to claim your exclusive Finisher's reward and VIP pour.",
@@ -170,6 +173,8 @@ export const i18n = {
     collected: "สะสมแล้ว",
     scan_btn: "สแกน QR ร้าน",
     enter_grove: "Enter Grove",
+    auth_connection_error: "เชื่อมต่อ LINE ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง",
+    auth_retry_button: "ลองอีกครั้ง",
     qr_fallback_title: "สแกนคิวอาร์โค้ด",
     qr_fallback_desc: "ใช้กล้องของคุณหรืออัปโหลดรูป QR เพื่อดำเนินการต่อ",
     qr_fallback_camera: "ใช้กล้อง",
@@ -187,7 +192,8 @@ export const i18n = {
     qr_fallback_camera_busy: "กล้องกำลังถูกใช้งานหรือเริ่มต้นไม่ได้ ปิดแอปกล้องอื่นแล้วลองใหม่",
     qr_fallback_camera_unavailable: "ไม่สามารถใช้กล้องสแกนได้ที่นี่ ลองอัปโหลดรูป QR แทน",
     qr_fallback_upload_error: "เราอ่าน QR จากรูปนี้ไม่ได้ ลองใช้รูปอื่น",
-    scan_line_unavailable: "ตัวสแกนของ LINE ยังไม่พร้อมใช้งานในขณะนี้ โปรดลองสแกนอีกครั้งจากภายในแอป LINE",
+    scan_line_unavailable:
+      "หน้าเว็บใน LINE ใช้กล้องแบบเดียวกับกล้องของ LINE โดยตรงไม่ได้ แตะสแกนอีกครั้งเพื่อเปิดตัวสแกน QR ของ LINE หากยังไม่ได้ ให้อัปเดต LINE หรือเปิดลิงก์นี้ใน Chrome/Safari",
     vip_unlocked: "ปลดล็อก VIP แล้ว",
     vip_desc: "แสดงหน้าจอนี้ที่ทางเข้างานเทศกาลเพื่อรับรางวัลผู้พิชิตและคราฟต์เบียร์ VIP ของคุณ",
     events_title: "ค้นพบ",
@@ -293,6 +299,8 @@ export const i18n = {
     collected: "Собрано",
     scan_btn: "Сканировать QR-код",
     enter_grove: "Enter Grove",
+    auth_connection_error: "Не удалось связаться с LINE. Проверьте подключение и попробуйте снова.",
+    auth_retry_button: "Повторить",
     qr_fallback_title: "Сканировать QR-код",
     qr_fallback_desc: "Используйте камеру или загрузите изображение QR-кода, чтобы продолжить.",
     qr_fallback_camera: "Открыть камеру",
@@ -310,7 +318,8 @@ export const i18n = {
     qr_fallback_camera_busy: "Камера занята или не смогла запуститься. Закройте другие приложения камеры и попробуйте снова.",
     qr_fallback_camera_unavailable: "Сканирование камерой здесь недоступно. Попробуйте загрузить изображение QR-кода.",
     qr_fallback_upload_error: "Не удалось прочитать QR-код с этого изображения. Попробуйте другую фотографию.",
-    scan_line_unavailable: "Сканер LINE сейчас недоступен. Попробуйте снова запустить сканирование внутри приложения LINE.",
+    scan_line_unavailable:
+      "Встроенная страница в LINE не может использовать камеру так же, как штатная камера LINE. Нажмите «Сканировать» снова, чтобы открыть QR-сканер LINE. Если не поможет — обновите LINE или откройте ссылку в Chrome/Safari.",
     vip_unlocked: "VIP РАЗБЛОКИРОВАН",
     vip_desc:
       "Покажите этот экран на входе на фестиваль Grove, чтобы получить награду финалиста и VIP-напиток.",
