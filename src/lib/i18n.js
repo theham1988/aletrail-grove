@@ -43,6 +43,8 @@ export const i18n = {
     qr_fallback_upload_error: "We couldn't read a QR code from that image. Try another photo.",
     scan_line_unavailable:
       "The in-app web page can't use your camera the same way LINE's own camera does. Tap Scan again to open LINE's QR scanner. If it still fails, update LINE or open this link in Chrome/Safari.",
+    scan_line_scanner_stuck:
+      "LINE's scanner did not start in time (spinning loader). Close it with X, update LINE, and try again. You can tap the gallery icon in the scanner to pick a QR photo. Opening the app from your official liff.line.me link often fixes camera issues on .web.app.",
     vip_unlocked: "VIP UNLOCKED",
     vip_desc:
       "Show this screen at the Grove Festival entrance to claim your exclusive Finisher's reward and VIP pour.",
@@ -198,6 +200,8 @@ export const i18n = {
     qr_fallback_upload_error: "เราอ่าน QR จากรูปนี้ไม่ได้ ลองใช้รูปอื่น",
     scan_line_unavailable:
       "หน้าเว็บใน LINE ใช้กล้องแบบเดียวกับกล้องของ LINE โดยตรงไม่ได้ แตะสแกนอีกครั้งเพื่อเปิดตัวสแกน QR ของ LINE หากยังไม่ได้ ให้อัปเดต LINE หรือเปิดลิงก์นี้ใน Chrome/Safari",
+    scan_line_scanner_stuck:
+      "ตัวสแกนของ LINE ไม่พร้อมทันเวลา (วนที่โหลด) ปิดด้วย X อัปเดต LINE แล้วลองใหม่ แตะไอคอนแกลเลอรีในตัวสแกนเพื่อเลือกรูป QR ได้ การเปิดแอปจากลิงก์ liff.line.me มักแก้ปัญหากล้องเมื่อใช้ .web.app",
     vip_unlocked: "ปลดล็อก VIP แล้ว",
     vip_desc: "แสดงหน้าจอนี้ที่ทางเข้างานเทศกาลเพื่อรับรางวัลผู้พิชิตและคราฟต์เบียร์ VIP ของคุณ",
     events_title: "ค้นพบ",
@@ -326,6 +330,8 @@ export const i18n = {
     qr_fallback_upload_error: "Не удалось прочитать QR-код с этого изображения. Попробуйте другую фотографию.",
     scan_line_unavailable:
       "Встроенная страница в LINE не может использовать камеру так же, как штатная камера LINE. Нажмите «Сканировать» снова, чтобы открыть QR-сканер LINE. Если не поможет — обновите LINE или откройте ссылку в Chrome/Safari.",
+    scan_line_scanner_stuck:
+      "Сканер LINE не запустился вовремя (крутится загрузка). Закройте крестиком, обновите LINE и попробуйте снова. В сканере можно нажать значок галереи и выбрать фото с QR. Официальная ссылка liff.line.me часто устраняет проблему с камерой на .web.app.",
     vip_unlocked: "VIP РАЗБЛОКИРОВАН",
     vip_desc:
       "Покажите этот экран на входе на фестиваль Grove, чтобы получить награду финалиста и VIP-напиток.",

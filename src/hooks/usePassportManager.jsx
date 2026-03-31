@@ -34,7 +34,10 @@ const DEFAULT_FESTIVAL_META = {
 
 const SCAN_CANCELLED = "scan_cancelled";
 const SCAN_LINE_UNAVAILABLE = "scan_line_unavailable";
+const SCAN_LINE_SCAN_TIMEOUT = "scan_line_scan_timeout";
 const SCAN_UNSUPPORTED = "scan_unsupported";
+
+const LINE_NATIVE_SCAN_TIMEOUT_MS = 45000;
 
 const ALE_TRAIL_VALID_KEYS = new Set(aleTrailVendors.map((vendor) => vendor.key));
 
@@ -145,10 +148,18 @@ async function scanQRCode() {
 
   if (useNativeScanner) {
     try {
-      const result = await liff.scanCodeV2();
+      const result = await Promise.race([
+        liff.scanCodeV2(),
+        new Promise((_, reject) => {
+          window.setTimeout(() => reject(new Error("__line_scan_timeout__")), LINE_NATIVE_SCAN_TIMEOUT_MS);
+        }),
+      ]);
       const scannedValue = result?.value?.toString().trim();
       return scannedValue || SCAN_CANCELLED;
     } catch (error) {
+      if (error?.message === "__line_scan_timeout__") {
+        return SCAN_LINE_SCAN_TIMEOUT;
+      }
       const message = error?.message?.toLowerCase() || "";
       if (message.includes("cancel") || message.includes("close") || message.includes("abort")) {
         return SCAN_CANCELLED;
@@ -314,6 +325,10 @@ export function usePassportManager(userId, authProfile) {
           ? providedPayload.trim()
           : await scanQRCode();
 
+      if (payload === SCAN_LINE_SCAN_TIMEOUT) {
+        setError("");
+        return { lineScannerTimedOut: true };
+      }
       if (payload === SCAN_LINE_UNAVAILABLE) {
         setError("");
         return { lineScannerUnavailable: true };

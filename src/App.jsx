@@ -12,7 +12,7 @@ const LOCAL_USER_KEY = "rig_demo_user_id";
 const LIFF_PROFILE_CACHE_KEY = "rig_liff_profile_cache";
 const LIFF_LOGIN_INTENT_KEY = "rig_liff_login_intent";
 const APP_CACHE_VERSION_KEY = "rig_app_cache_version";
-const APP_CACHE_VERSION = "2026-03-31-intro-line-auth-v1";
+const APP_CACHE_VERSION = "2026-03-31-intro-video-scan-timeout-v1";
 const LIFF_ID = "2009417360-sriLePd1";
 const LIFF_INIT_TIMEOUT_MS = 20000;
 
@@ -339,6 +339,11 @@ export default function App() {
       return;
     }
 
+    if (result.lineScannerTimedOut) {
+      window.alert(t("scan_line_scanner_stuck"));
+      return;
+    }
+
     if (result.lineScannerUnavailable) {
       window.alert(t("scan_line_unavailable"));
       return;
@@ -384,15 +389,12 @@ export default function App() {
     }
   }, [isLineClient, scanAndApplyVendor, t]);
 
-  const shouldPlayIntroVideo = !isLineClient && !isLikelyLineInAppBrowser();
-  const introUiVisible = introVideoReady || !shouldPlayIntroVideo;
-
   useEffect(() => {
     if (showIntro) {
       setIntroMounted(true);
-      setIntroVideoReady(!shouldPlayIntroVideo);
+      setIntroVideoReady(false);
     }
-  }, [showIntro, shouldPlayIntroVideo]);
+  }, [showIntro]);
 
   useEffect(() => {
     return () => {
@@ -631,29 +633,22 @@ export default function App() {
                 paddingBottom: "60px",
               }}
             >
-              {!shouldPlayIntroVideo && <div className="intro-static-backdrop" aria-hidden />}
-              {shouldPlayIntroVideo && (
-                <video
-                  className="intro-video"
-                  src="/intro.mp4"
-                  autoPlay
-                  muted
-                  playsInline
-                  onLoadedData={() => setIntroVideoReady(true)}
-                  onError={() => setIntroVideoReady(true)}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    zIndex: -1,
-                    opacity: introVideoReady ? 1 : 0,
-                    transition: "opacity 0.2s ease-in-out",
-                  }}
-                />
-              )}
+              <div className="intro-static-backdrop" aria-hidden />
+              <video
+                className="intro-video intro-video-layer"
+                src="/intro.mp4"
+                autoPlay
+                muted
+                playsInline
+                onLoadedData={() => setIntroVideoReady(true)}
+                onCanPlay={() => setIntroVideoReady(true)}
+                onPlaying={() => setIntroVideoReady(true)}
+                onError={() => setIntroVideoReady(true)}
+                style={{
+                  opacity: introVideoReady ? 1 : 0,
+                  transition: "opacity 0.35s ease-in-out",
+                }}
+              />
               <button
                 type="button"
                 className="pressable"
@@ -671,8 +666,6 @@ export default function App() {
                   letterSpacing: "2px",
                   boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
                   zIndex: 10000,
-                  opacity: introUiVisible ? 1 : 0,
-                  transition: "opacity 0.2s ease-in-out",
                 }}
               >
                 {authActionPending || (!authReady && !isEmbeddedPreview) ? t("syncing") : t("enter_grove")}
@@ -687,8 +680,6 @@ export default function App() {
                   fontWeight: 600,
                   lineHeight: 1.4,
                   zIndex: 10000,
-                  opacity: introUiVisible ? 1 : 0,
-                  transition: "opacity 0.2s ease-in-out",
                 }}
               >
                 {authError || (initialUserId ? t("passport_hub_hint") : t("join_note"))}
@@ -704,8 +695,6 @@ export default function App() {
                     fontWeight: 600,
                     lineHeight: 1.45,
                     zIndex: 10000,
-                    opacity: introUiVisible ? 1 : 0,
-                    transition: "opacity 0.2s ease-in-out",
                   }}
                 >
                   {t("auth_use_official_liff_link")}
@@ -719,8 +708,6 @@ export default function App() {
                   style={{
                     marginTop: "12px",
                     zIndex: 10000,
-                    opacity: introUiVisible ? 1 : 0,
-                    transition: "opacity 0.2s ease-in-out",
                     padding: "10px 20px",
                     borderRadius: "12px",
                     fontSize: "13px",
