@@ -144,6 +144,21 @@ p {
   display: block;
 }
 
+.intro-static-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(165deg, #1e3d2e 0%, #0f2418 45%, #0a1810 100%);
+}
+
+.intro-static-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% 20%, rgba(245, 194, 77, 0.12), transparent 55%);
+}
+
 .intro-skip-btn {
   position: absolute;
   top: 20px;

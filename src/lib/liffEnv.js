@@ -8,3 +8,9 @@ export function isLikelyLineInAppBrowser() {
   const ua = navigator.userAgent;
   return /Line\//i.test(ua) || /\bLIFF\b/i.test(ua);
 }
+
+export function isFirebaseHostingHost() {
+  if (typeof window === "undefined" || !window.location?.hostname) return false;
+  const h = window.location.hostname;
+  return h.endsWith(".web.app") || h.endsWith(".firebaseapp.com");
+}

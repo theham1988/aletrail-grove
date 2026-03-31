@@ -22,6 +22,8 @@ export const i18n = {
     enter_grove: "Enter Grove",
     auth_connection_error: "Could not reach LINE. Check your connection and try again.",
     auth_retry_button: "Try again",
+    auth_use_official_liff_link:
+      "For the most reliable login inside LINE, open this app from your official LINE menu or chat link (liff.line.me), not only the raw .web.app URL. In LINE Developers, add this site URL as an Endpoint URL if you need the Firebase link to work.",
     qr_fallback_title: "Scan QR Code",
     qr_fallback_desc: "Use your camera or upload a QR image to continue.",
     qr_fallback_camera: "Use Camera",
@@ -175,6 +177,8 @@ export const i18n = {
     enter_grove: "Enter Grove",
     auth_connection_error: "เชื่อมต่อ LINE ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง",
     auth_retry_button: "ลองอีกครั้ง",
+    auth_use_official_liff_link:
+      "เพื่อล็อกอินใน LINE ให้เสถียรที่สุด ให้เปิดแอปจากเมนู LINE หรือลิงก์แชทอย่างเป็นทางการ (liff.line.me) ไม่ใช่แค่ URL .web.app เปล่าๆ หากต้องการให้ลิงก์ Firebase ใช้ได้ ให้เพิ่ม URL นั้นเป็น Endpoint URL ใน LINE Developers",
     qr_fallback_title: "สแกนคิวอาร์โค้ด",
     qr_fallback_desc: "ใช้กล้องของคุณหรืออัปโหลดรูป QR เพื่อดำเนินการต่อ",
     qr_fallback_camera: "ใช้กล้อง",
@@ -301,6 +305,8 @@ export const i18n = {
     enter_grove: "Enter Grove",
     auth_connection_error: "Не удалось связаться с LINE. Проверьте подключение и попробуйте снова.",
     auth_retry_button: "Повторить",
+    auth_use_official_liff_link:
+      "Для стабильного входа внутри LINE откройте приложение из официального меню или ссылки в чате (liff.line.me), а не только по «голому» адресу .web.app. Если нужен именно Firebase-URL, добавьте его как Endpoint URL в LINE Developers.",
     qr_fallback_title: "Сканировать QR-код",
     qr_fallback_desc: "Используйте камеру или загрузите изображение QR-кода, чтобы продолжить.",
     qr_fallback_camera: "Открыть камеру",
